@@ -1,5 +1,7 @@
 package mainpanel;
 
+import main.Constants;
+
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Dimension;
@@ -25,15 +27,13 @@ public class MainPanel extends JPanel {
     TopPanel topPanel;
     BottomPanel bottomPanel;
 
-    int PREF_W, PREF_H, topHeight, bottomHeight;
-
     JPanel sideBar;
 
     MinecraftPlayer currentPlayer;
     ArrayList<MinecraftPlayer> players = new ArrayList<MinecraftPlayer>();
 
     void createTopPanel() {
-        topPanel = new TopPanel(PREF_W, PREF_H, topHeight, () -> {
+        topPanel = new TopPanel(Constants.TOP_HEIGHT, () -> {
             this.load();
             topPanel.loadButton.setVisible(false);
         }, () -> {
@@ -42,27 +42,17 @@ public class MainPanel extends JPanel {
     }
 
     void createBottomPanel() {
-        
-        bottomPanel = new BottomPanel((idx) -> {
-            currentPlayer = players.get(idx);
-            bottomPanel.playerViewer.setPlayer(currentPlayer);
-        });
-
+        bottomPanel = new BottomPanel(players);
     }
 
-    public MainPanel(int PREF_W, int PREF_H) {
-
-        this.PREF_W = PREF_W;
-        this.PREF_H = PREF_H;
-        this.topHeight = 100;
-        this.bottomHeight = PREF_H - topHeight * 2;
+    public MainPanel() {
 
         createTopPanel();
         createBottomPanel();
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(bottomPanel, BorderLayout.CENTER);
-        this.setPreferredSize(new Dimension(PREF_W, PREF_H));
+        this.setPreferredSize(new Dimension(Constants.PREF_W, Constants.PREF_H));
 
     }
 

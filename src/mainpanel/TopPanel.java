@@ -1,5 +1,7 @@
 package mainpanel;
 
+import main.Constants;
+
 import java.awt.Color;
 import java.awt.Dimension;
 
@@ -19,7 +21,7 @@ public class TopPanel extends JPanel {
     JLabel statusLabel;
     JButton loadButton, backButton;
 
-    public TopPanel(int PREF_W, int PREF_H, int topHeight, ServerLoadEvent onLoad, ServerExitEvent onExit) {
+    public TopPanel(int topHeight, ServerLoadEvent onLoad, ServerExitEvent onExit) {
         
         loadButton = new JButton("Confirm");
         loadButton.addActionListener(e -> {
@@ -36,7 +38,7 @@ public class TopPanel extends JPanel {
         this.add(statusLabel);
         this.add(loadButton);
         this.add(backButton);
-        this.setPreferredSize(new Dimension(PREF_W, topHeight));
+        this.setPreferredSize(new Dimension(Constants.PREF_W, topHeight));
         
     }
 }

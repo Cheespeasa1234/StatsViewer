@@ -1,8 +1,11 @@
 package mainpanel;
 
 import main.Constants;
+import main.MinecraftPlayer;
 
 import java.awt.Dimension;
+import java.awt.List;
+import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
@@ -28,13 +31,13 @@ public class BottomPanel extends JTabbedPane {
         public void itemListInteracted(int selected);
     }
 
-    public BottomPanel(ItemListInteractionEvent onItemListInteraction) {
+    public BottomPanel(ArrayList<MinecraftPlayer> players) {
         listModel = new DefaultListModel<>();
         itemList = new JList<>(listModel);
         itemList.getSelectionModel().addListSelectionListener(e -> {
             ListSelectionModel lsm = ((ListSelectionModel) e.getSource());
             int idx = lsm.getMinSelectionIndex();
-            onItemListInteraction.itemListInteracted(idx);
+            playerViewer.setPlayer(players.get(idx));
         });
 
         JScrollPane scrollPane = new JScrollPane(itemList);
@@ -64,7 +67,6 @@ public class BottomPanel extends JTabbedPane {
         panel2.setPreferredSize(new Dimension(Constants.PREF_W, Constants.BOTTOM_HEIGHT));
         
         this.setPreferredSize(new Dimension(Constants.PREF_W, Constants.BOTTOM_HEIGHT));
-
         this.addTab("Players", playersPage);
         this.addTab("Level", panel2);
 

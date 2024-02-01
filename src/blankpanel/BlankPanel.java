@@ -9,6 +9,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 
 import main.Lib;
+import main.Constants;
 
 public class BlankPanel extends JPanel {
 
@@ -25,8 +26,8 @@ public class BlankPanel extends JPanel {
 
     public FileChosenListener fileChosenListener;
     
-    public BlankPanel(Font f, int PREF_W, int PREF_H, FileChosenListener fileChosenListener) {
-        this.setPreferredSize(new Dimension(PREF_W, PREF_H));
+    public BlankPanel(Font f, FileChosenListener fileChosenListener) {
+        this.setPreferredSize(new Dimension(Constants.PREF_W, Constants.PREF_H));
         this.label = new JLabel("No server opened yet.");
         this.prevButton = new JButton("Previous Servers");
         this.locateButton = new JButton("Locate Server");

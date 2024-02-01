@@ -8,6 +8,8 @@ import main.MinecraftPlayer;
 public class PlayerView extends JPanel {
     JLabel status;
     JTabbedPane statsTabs;
+    MinecraftPlayer player = null;
+
     public PlayerView() {
         status = new JLabel("No player.");
         statsTabs = new JTabbedPane();
@@ -17,6 +19,8 @@ public class PlayerView extends JPanel {
     }
 
     public void setPlayer(MinecraftPlayer player) {
+        this.player = player;
+
         status = new JLabel("Current Player: " + player.UUID);
         statsTabs = new JTabbedPane();
         statsTabs.setVisible(true);

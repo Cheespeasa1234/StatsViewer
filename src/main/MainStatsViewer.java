@@ -27,10 +27,7 @@ import blankpanel.BlankPanel;
 import mainpanel.MainPanel;
 
 
-public class StatsViewer extends JPanel implements KeyListener {
-
-    public static final int PREF_W = 800;
-    public static final int PREF_H = 600;
+public class MainStatsViewer extends JPanel implements KeyListener {
 
     File serverDirectory = null;
 
@@ -68,14 +65,14 @@ public class StatsViewer extends JPanel implements KeyListener {
     void createPages() {
 
         // Set the choosing panel
-        blankPanel = new BlankPanel(this.font, PREF_W, PREF_H, file -> {
+        blankPanel = new BlankPanel(this.font, file -> {
             convertFiles(file);
             mainPanel.setFile(file);
             setPage(1);
         });
         
         // Set the main panel
-        mainPanel = new MainPanel(PREF_W, PREF_H);
+        mainPanel = new MainPanel();
         
         addPage(blankPanel);
         addPage(mainPanel);
@@ -85,14 +82,11 @@ public class StatsViewer extends JPanel implements KeyListener {
 
     }
 
-    public StatsViewer() {
+    public MainStatsViewer() {
 
         this.setFocusable(true);
         this.setBackground(Color.WHITE);
         this.addKeyListener(this);
-
-        Constants.PREF_W = PREF_W;
-        Constants.PREF_H = PREF_H;
 
 
         try {
@@ -142,12 +136,12 @@ public class StatsViewer extends JPanel implements KeyListener {
     /* METHODS FOR CREATING JFRAME AND JPANEL */
 
     public Dimension getPreferredSize() {
-        return new Dimension(PREF_W, PREF_H);
+        return new Dimension(Constants.PREF_W, Constants.PREF_H);
     }
 
     public static void createAndShowGUI() {
         JFrame frame = new JFrame("Minecraft Statistics Viewer");
-        JPanel gamePanel = new StatsViewer();
+        JPanel gamePanel = new MainStatsViewer();
 
         frame.getContentPane().add(gamePanel);
         frame.pack();
