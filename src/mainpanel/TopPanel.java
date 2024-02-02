@@ -8,7 +8,6 @@ import java.awt.Dimension;
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import main.Lib;
 
 public class TopPanel extends JPanel {
     public interface ServerLoadEvent {

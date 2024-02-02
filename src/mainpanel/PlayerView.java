@@ -5,7 +5,6 @@ import main.Lib;
 import main.ScrollableLabelPanel;
 
 import java.awt.Dimension;
-import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -14,15 +13,8 @@ import java.util.Map;
 import javax.swing.BoxLayout;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
-import javax.swing.JScrollBar;
-import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 
-import com.google.gson.Gson;
-
-import main.Constants;
-import main.ScrollableLabelPanel;
 import player.Item;
 import player.MinecraftPlayer;
 

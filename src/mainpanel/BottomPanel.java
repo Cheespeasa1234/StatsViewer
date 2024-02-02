@@ -4,17 +4,13 @@ import main.Constants;
 import player.MinecraftPlayer;
 
 import java.awt.Dimension;
-import java.awt.List;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
-import javax.swing.JLabel;
 import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
-import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
-import javax.swing.plaf.synth.SynthDesktopIconUI;
 
 public class BottomPanel extends JPanel {
 

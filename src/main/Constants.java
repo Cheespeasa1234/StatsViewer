@@ -8,4 +8,5 @@ public class Constants {
     public static final int TOP_HEIGHT = 75;
     public static final int BOTTOM_HEIGHT = PREF_H - TOP_HEIGHT * 2;
     public static final Font FONT_PRIMARY = new Font("Helvetica", Font.PLAIN, 16);
+
 }
