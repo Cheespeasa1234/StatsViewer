@@ -1,110 +1,100 @@
 package player;
 
-import java.io.FileReader;
-import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Item {
     
-    @SerializedName("Slot") public int slot;
-    public String id;
-    @SerializedName("Count") public int count;
-    @SerializedName("Damage") public int damage;
-    @SerializedName("RepairCost") public int repairCost;
-    @SerializedName("Items") public Item[] items;
-    @SerializedName("Enchantments") public Enchantment[] enchantments;
-    @SerializedName("Trim") public Trim trim;
-    public String name;
-    public Tag tag; // Add 'tag' field for nested structure
+    @Expose @SerializedName("Slot") public int slot;
+    @Expose public String id;
+    @Expose @SerializedName("Count") public int count;
+    @Expose @SerializedName("Damage") public int damage;
+    @Expose @SerializedName("RepairCost") public int repairCost;
+    @Expose @SerializedName("Items") public Item[] items;
+    @Expose @SerializedName("Enchantments") public Enchantment[] enchantments;
+    @Expose @SerializedName("Trim") public Trim trim;
+    @Expose public String name;
+    @Expose public Tag tag; // Add 'tag' field for nested structure
     
     public class Tag {
-        @SerializedName("RepairCost") public Integer repairCost;
-        @SerializedName("Damage") public Integer damage;
-        @SerializedName("Enchantments") public Enchantment[] enchantments;
-        @SerializedName("BlockEntityTag") public BlockEntityTag blockEntityTag;
+        @Expose @SerializedName("RepairCost") public Integer repairCost;
+        @Expose @SerializedName("Damage") public Integer damage;
+        @Expose @SerializedName("Enchantments") public Enchantment[] enchantments;
+        @Expose @SerializedName("BlockEntityTag") public BlockEntityTag blockEntityTag;
         
         // naming
-        public Display display;
-        public String id;
+        @Expose public Display display;
+        @Expose public String id;
         
         // trims
-        @SerializedName("Base") public Integer base;
-        public Pattern[] patterns;
+        @Expose @SerializedName("Base") public Integer base;
+        @Expose public Pattern[] patterns;
         
         // goat horns
-        public String instrument;
+        @Expose public String instrument;
 
         // crossbows
-        @SerializedName("ChargedProjectiles")
-        public ChargedProjectile[] chargedProjectiles;
-        @SerializedName("Charged")
-        public Integer charged;
+        
+        @Expose @SerializedName("ChargedProjectiles") public ChargedProjectile[] chargedProjectiles;
+        @Expose @SerializedName("Charged") public Integer charged;
         
         // firework rocket
-        @SerializedName("Fireworks")
-        public Fireworks fireworks;
+        @Expose @SerializedName("Fireworks") public Fireworks fireworks;
         
         // books
-        public String[] pages;
-        public String author;
-        public String title;
-        public Integer resolved;
+        @Expose public String[] pages;
+        @Expose public String author;
+        @Expose public String title;
+        @Expose public Integer resolved;
 
         public class Display {
-            @SerializedName("Name") public String name;
+            @Expose @SerializedName("Name") public String name;
         }
         public class BlockEntityTag {
-            @SerializedName("Items") public Item[] items;
-            public String id;
+            @Expose @SerializedName("Items") public Item[] items;
+            @Expose public String id;
         }        
         public class Pattern {
-            public String pattern;
-            public Integer color;
+            @Expose public String pattern;
+            @Expose public Integer color;
         }
         public class ChargedProjectile {
-            public String id;
-            @SerializedName("Count")
-            public Integer count;
+            @Expose public String id;
+            @Expose @SerializedName("Count") public Integer count;
         }
         public class Fireworks {
-            public Explosion explosion;
-            @SerializedName("Flight")
-            public Integer flight;
+            @Expose public Explosion explosion;
+            @Expose @SerializedName("Flight") public Integer flight;
     
             public class Explosion {
-                @SerializedName("Flicker")
-                public Boolean flicker;
-                @SerializedName("Trail")
-                public Boolean trail;
-                public Integer[] colors;
-                @SerializedName("FadeColors")
-                public Integer[] fadeColors;
-                public Type type;
+                
+                @Expose @SerializedName("Flicker") public Boolean flicker;
+
+                @Expose @SerializedName("Trail") public Boolean trail;
+                @Expose public Integer[] colors;
+                
+                @Expose @SerializedName("FadeColors") public Integer[] fadeColors;
+                @Expose public Type type;
     
                 public class Type {
-                    public String name;
+                    @Expose public String name;
                 }
             }
         }
     }
 
     public class Enchantment {
-        public String id;
-        public Integer lvl;
+        @Expose public String id;
+        @Expose public Integer lvl;
     }
 
     public class Trim {
-        public String type;
-        public String material;
+        @Expose public String type;
+        @Expose public String material;
     }
 
     public class Inventories {
@@ -128,7 +118,7 @@ public class Item {
     }
 
     public String toFancyString() {
-        String count = (this.count > 1) ? (" x" + this.count) : "";
+        String count = (this.count > 1) ? ("x" + this.count + " ") : "";
         String damage = "";
         String repairCost = "";
         String tag = (this.tag != null) ? toString(this.tag) : "";
@@ -139,37 +129,20 @@ public class Item {
             repairCost = " with " + repairCost + " repair cost";
         }
     
-        return "(slot " + slot + ") " + id + count + damage + repairCost + tag;
-    }
-
-    public static List<Item> getInventoryItems(String filePath) {
-        return getItems(filePath, "Inventory");
-    }
-
-    public static List<Item> getEnderItems(String filePath) {
-        return getItems(filePath, "EnderItems");
-    }
-
-    private static List<Item> getItems(String filePath, String sectionName) {
-        List<Item> items = new ArrayList<Item>();
-
-        try {
-            Gson gson = new Gson();
-            JsonObject playerData = gson.fromJson(new FileReader(filePath), JsonObject.class);
-
-            if (playerData.has(sectionName)) {
-                JsonArray itemsArray = playerData.getAsJsonArray(sectionName);
-
-                for (JsonElement itemElement : itemsArray) {
-                    Item item = gson.fromJson(itemElement, Item.class);
-                    items.add(item);
-                }
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
+        String slot = "(slot " + this.slot + ")";
+        if (this.slot == 103) {
+            slot = "(helmet)";
+        } else if (this.slot == 102) {
+            slot = "(chestplate)";
+        } else if (this.slot == 101) {
+            slot = "(leggings)";
+        } else if (this.slot == 100) {
+            slot = "(boots)";
+        } else if (this.slot == -106) {
+            slot = "(offhand)";
         }
 
-        return items;
+        return slot + " " + count + id + damage + repairCost + tag;
     }
 
     public static void printInventoryContents(List<List<Item>> inventories) {
@@ -192,11 +165,5 @@ public class Item {
             }
         }
         return out;
-    }
-
-    public static List<List<Item>> getItems(String filePath) {
-        List<Item> inventoryItems = getInventoryItems(filePath);
-        List<Item> enderItems = getEnderItems(filePath);
-        return List.of(inventoryItems, enderItems);
     }
 }

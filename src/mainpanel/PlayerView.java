@@ -19,6 +19,8 @@ import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextArea;
 
+import com.google.gson.Gson;
+
 import main.Constants;
 import main.ScrollableLabelPanel;
 import player.Item;
@@ -36,66 +38,80 @@ public class PlayerView extends JPanel {
         this.add(statsGroups);
         this.setPreferredSize(new Dimension(Constants.PREF_W - 200, Constants.BOTTOM_HEIGHT));
     }
-    
-    public void setPlayer(MinecraftPlayer player) {
-        
-        this.player = player;
-        statsGroups.removeAll();
-        
+
+    public JPanel createInventoryPanel(MinecraftPlayer player) {
         JPanel inventoryPanel = new JPanel();
-
         JPanel mainInventoryContainer = new JPanel();
-        mainInventoryContainer.setLayout(new BoxLayout(mainInventoryContainer, BoxLayout.Y_AXIS));
-        
         JPanel enderInventoryContainer = new JPanel();
+        mainInventoryContainer.setLayout(new BoxLayout(mainInventoryContainer, BoxLayout.Y_AXIS));
         enderInventoryContainer.setLayout(new BoxLayout(enderInventoryContainer, BoxLayout.Y_AXIS));
-
-        ScrollableLabelPanel mainInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2, Constants.BOTTOM_HEIGHT - 100);
-        ScrollableLabelPanel enderInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2, Constants.BOTTOM_HEIGHT - 100);
-
+        ScrollableLabelPanel mainInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2,
+                Constants.BOTTOM_HEIGHT - 100);
+        ScrollableLabelPanel enderInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2,
+                Constants.BOTTOM_HEIGHT - 100);
         JLabel mainInventoryLabel = new JLabel("Main Inventory");
         mainInventoryLabel.setFont(Constants.FONT_PRIMARY.deriveFont(24f));
         mainInventoryContainer.add(mainInventoryLabel);
-
         JLabel enderInventoryLabel = new JLabel("Ender Inventory");
         enderInventoryLabel.setFont(Constants.FONT_PRIMARY.deriveFont(24f));
         enderInventoryContainer.add(enderInventoryLabel);
-
-        for (Item item: player.mainInventory) {
-            mainInventoryPanel.addLabel(item.toFancyString());
-        }
-
-        for (Item item: player.enderInventory) {
-            enderInventoryPanel.addLabel(item.toFancyString());
-        }
-
+        if (player.mainInventory.size() == 0)
+            mainInventoryPanel.addLabel("No items in main inventory");
+        else
+            for (Item item : player.mainInventory)
+                mainInventoryPanel.addLabel(item.toFancyString());
+        if (player.enderInventory.size() == 0)
+            enderInventoryPanel.addLabel("No items in ender inventory");
+        else
+            for (Item item : player.enderInventory)
+                enderInventoryPanel.addLabel(item.toFancyString());
         mainInventoryContainer.add(mainInventoryPanel);
         enderInventoryContainer.add(enderInventoryPanel);
-
         inventoryPanel.add(mainInventoryContainer);
         inventoryPanel.add(enderInventoryContainer);
+        return inventoryPanel;
+    }
 
-        statsGroups.addTab("Inventory", inventoryPanel);
+    public ScrollableLabelPanel createStatsTab(String tabName) {
+        int size = player.stats.get(tabName).size();
+        if (size == 0) return null;
 
-        // set the stats
-        for (int i = 0; i < player.stats.statsGroups.size(); i++) {
-            
-            int size = player.stats.statsGroups.get(i).size();
-            if (size == 0) continue;
-            
-            String tabEntryCount = " (" + size + ")";
-            ScrollableLabelPanel scrollableLabelPanel = new ScrollableLabelPanel(Constants.PREF_W - 200, Constants.BOTTOM_HEIGHT - 100);
+        ScrollableLabelPanel scrollableLabelPanel = new ScrollableLabelPanel(Constants.PREF_W - 200,
+                Constants.BOTTOM_HEIGHT - 100);
 
-            // make the layout so everything is on a new line
-            List<HashMap.Entry<String, Double>> entries = new ArrayList<HashMap.Entry<String, Double>>(player.stats.statsGroups.get(i).entrySet());
-            entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
-            for (HashMap.Entry<String, Double> entry : entries) {
-                scrollableLabelPanel.addLabel(entry.getKey() + ": " + Lib.doubleToString(entry.getValue()));
-            }
-            
-            String tabName = player.stats.statsGroupsNames.get(i);
-            statsGroups.addTab(tabName + tabEntryCount, scrollableLabelPanel);
+        // make the layout so everything is on a new line
+        List<HashMap.Entry<String, Double>> entries = new ArrayList<HashMap.Entry<String, Double>>(
+                player.stats.get(tabName).entrySet());
+        entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
+        for (HashMap.Entry<String, Double> entry : entries) {
+            scrollableLabelPanel.addLabel(entry.getKey() + ": " + Lib.doubleToString(entry.getValue()));
+        }
 
+        return scrollableLabelPanel;
+    }
+    
+    public void setPlayer(MinecraftPlayer player) {
+
+        // reset everything
+        this.player = player;
+        statsGroups.removeAll();
+
+        // make the inventory tab        
+        statsGroups.addTab("Inventory", createInventoryPanel(player));
+
+        // get a list of all the maps in the stats
+        String[] tabNamesArray = new String[player.stats.keySet().size()];
+        player.stats.keySet().toArray(tabNamesArray);
+
+        for (int i = 0; i < tabNamesArray.length; i++) {
+
+            String tabName = tabNamesArray[i];
+            String tabEntryCount = " (" + player.stats.get(tabName).size() + ")";
+
+            ScrollableLabelPanel scrollableLabelPanel = createStatsTab(tabName);
+            if (scrollableLabelPanel == null) continue;
+
+            statsGroups.addTab(tabName.substring(tabName.indexOf(":") + 1) + tabEntryCount, scrollableLabelPanel);
         }
         status.setText("Current Player: " + player.getName());
         status.setVisible(true);

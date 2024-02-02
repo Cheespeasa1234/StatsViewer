@@ -23,13 +23,15 @@ public class BottomPanel extends JPanel {
 
     public DefaultListModel<String> listModel;
     public JList<String> itemList;
+    public ArrayList<MinecraftPlayer> players;
     public JScrollPane scrollPane;
 
     public interface ItemListInteractionEvent {
         public void itemListInteracted(int selected);
     }
 
-    public BottomPanel(ArrayList<MinecraftPlayer> players) {
+    public BottomPanel() {
+        players = new ArrayList<>();
         listModel = new DefaultListModel<>();
         itemList = new JList<>(listModel);
         itemList.getSelectionModel().addListSelectionListener(e -> {
@@ -38,6 +40,7 @@ public class BottomPanel extends JPanel {
                 return;
             }
             int idx = lsm.getMinSelectionIndex();
+            System.out.println(players);
             playerView.setPlayer(players.get(idx));
         });
 

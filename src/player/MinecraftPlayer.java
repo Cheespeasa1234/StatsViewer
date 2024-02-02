@@ -5,48 +5,82 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.io.Serial;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.UUID;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+import com.google.gson.reflect.TypeToken;
 
 import main.Lib;
 
 public class MinecraftPlayer {
+    @Expose
+    @SerializedName("UUID")
+    public int[] rawUUID;
 
+    @Expose
+    @SerializedName("Pos")
+    public double[] pos;
+
+    @Expose
+    @SerializedName("Dimension")
+    public String dimension;
+
+    @SerializedName("Motion")
+    public double[] motion;
+
+    @Expose
+    @SerializedName("Rotation")
+    public float[] rotation;
+
+    @Expose
+    @SerializedName("XpTotal")
+    public int xpTotal;
+
+    @Expose
+    @SerializedName("Inventory")
     public List<Item> mainInventory;
-    public List<Item> enderInventory;
-    public String UUID;
-    public Stats stats = new Stats();
-    public File serverFile;
 
-    public MinecraftPlayer(File statsFile, File serverFile) throws FileNotFoundException {
+    @Expose
+    @SerializedName("EnderItems")
+    public List<Item> enderInventory;
+
+    public transient File serverFile;
+
+    public Map<String, Map<String, Double>> stats;
+    public String name;
+
+    @SerializedName("fixedUUID")
+    public String UUID;
+
+    public void fixUUID() {
+        // turn it into four hex strings
+        long mostSigBits = ((long) rawUUID[0] << 32) | (rawUUID[1] & 0xFFFFFFFFL);
+        long leastSigBits = ((long) rawUUID[2] << 32) | (rawUUID[3] & 0xFFFFFFFFL);
+
+        UUID fmt = new UUID(mostSigBits, leastSigBits);
+        this.UUID = fmt.toString();
+    }
+
+    public void addStatsToMinecraftPlayer(File statsFile, File serverFile) throws FileNotFoundException {
 
         this.serverFile = serverFile;
-        this.UUID = statsFile.getName().substring(9, 36);
-        
-        // set the inventories
-        File playerDataFile = new File(statsFile.getAbsolutePath().replace("world/stats", ".statsviewer/world/playerdata"));
-        List<List<Item>> parsedItems = Item.getItems(playerDataFile.getAbsolutePath());
-        
-        // System.out.println("UUID: " + this.UUID);
-        // Item.printInventoryContents(parsedItems);
-        // System.out.println();
-
-        this.mainInventory = parsedItems.get(0);
-        this.enderInventory = parsedItems.get(1);
 
         // Format the statistics before proper parsing
         Lib.execute(
-            "python3",
-            "src/format-stat.py",
-            "-I",
-            statsFile.getAbsolutePath(),
-            statsFile.getAbsolutePath().replace("world", ".statsviewer/world"));
-
+                "python3",
+                "src/format-stat.py",
+                "-I",
+                statsFile.getAbsolutePath(),
+                statsFile.getAbsolutePath().replace("world", ".statsviewer/world"));
 
         // Parse the document
         Scanner fileScanner = new Scanner(statsFile);
@@ -57,38 +91,19 @@ public class MinecraftPlayer {
         }
         fileScanner.close();
 
-        // Parse the JSON
-        int currentStatGroup = 0;
-        List<String> tokens = Lib.splitPressedJSON(parsed);
-        for (int i = 0; i < tokens.size(); i++) {
-            String token = tokens.get(i);
+        Gson gson = new Gson();
+        JsonObject jsonObject = gson.fromJson(parsed, JsonObject.class);
+        TypeToken<Map<String, Map<String, Double>>> typeToken = new TypeToken<Map<String, Map<String, Double>>>() {
+        };
 
-            // if this is the token right before "stats", skip
-            if (token.equals("{")) {
-                i += 3;
-                continue;
-            } else if (token.equals(":{")) {
-                String groupName = tokens.get(i - 1).split(":")[1];
-                groupName = groupName.substring(0, groupName.length() - 1);
-                currentStatGroup = stats.statsGroupsNames.indexOf(groupName);
-            } else if (token.startsWith(":")) {
-                String key = tokens.get(i - 1);
-                String value = token.substring(1);
-                if (value.endsWith("}"))
-                    value = value.substring(0, value.indexOf('}'));
-                stats.statsGroups.get(currentStatGroup).put(key, Double.parseDouble(value));
-            }
-        }
+        this.stats = gson.fromJson(jsonObject, typeToken.getType());
 
     }
 
     public String getName() {
-        File usercache = new File(serverFile.getAbsolutePath() + "/usercache.json");
-        // use Gson to parse the usercache
-        // read the file as one string
-        String usercacheString = Lib.fileToString(usercache.getAbsolutePath());
-        Gson gson = new Gson();
-        
-        return this.UUID;
+        if (this.name == null) {
+            return this.UUID;
+        }
+        return this.name + " (" + this.UUID + ")";
     }
 }

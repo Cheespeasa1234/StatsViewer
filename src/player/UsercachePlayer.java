@@ -1,7 +1,11 @@
 package player;
 
+import com.google.gson.annotations.Expose;
+import com.google.gson.annotations.SerializedName;
+
 public class UsercachePlayer {
-    public String name;
-    public String uuid;
-    public String expiresOn;
+    @Expose public String name;
+    @Expose @SerializedName("uuid")
+    public String UUID;
+    @Expose public String expiresOn;
 }
