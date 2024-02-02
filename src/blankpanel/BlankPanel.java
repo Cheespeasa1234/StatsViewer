@@ -34,7 +34,7 @@ public class BlankPanel extends JPanel {
         this.fileChosenListener = fileChosenListener;
         this.locateButton.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
-            Lib.getInstance().setFontRecursively(fc, f);
+            Lib.setFontRecursively(fc, f);
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
             
             int returnVal = fc.showOpenDialog(this);

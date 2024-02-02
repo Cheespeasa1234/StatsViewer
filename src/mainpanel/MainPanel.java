@@ -1,6 +1,7 @@
 package mainpanel;
 
 import main.Constants;
+import player.MinecraftPlayer;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -19,15 +20,11 @@ import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 
-import main.MinecraftPlayer;
-
 public class MainPanel extends JPanel {
 
     File server;
     TopPanel topPanel;
     BottomPanel bottomPanel;
-
-    JPanel sideBar;
 
     MinecraftPlayer currentPlayer;
     ArrayList<MinecraftPlayer> players = new ArrayList<MinecraftPlayer>();
@@ -68,7 +65,7 @@ public class MainPanel extends JPanel {
         File[] files = statsDirectory.listFiles();
         for (File statsFile : files) {
             try {
-                MinecraftPlayer player = new MinecraftPlayer(statsFile);
+                MinecraftPlayer player = new MinecraftPlayer(statsFile, server);
                 players.add(player);
                 bottomPanel.listModel.addElement(player.UUID);
             } catch (FileNotFoundException e) {
@@ -78,5 +75,6 @@ public class MainPanel extends JPanel {
 
         long dif = System.currentTimeMillis() - start;
         topPanel.statusLabel.setText("Loaded in " + ((double) dif / 1000) + "s.");
+
     }
 }

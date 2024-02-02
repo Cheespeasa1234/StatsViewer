@@ -5,6 +5,7 @@ import java.awt.Font;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -14,9 +15,6 @@ import javax.swing.JComponent;
 
 public class Lib {
 
-    private static Lib l = new Lib();
-    public static Lib getInstance() { return l; };
-
     /**
      * Sets the font of all children, and their children, and so on, of all elements, while preserving style
      * If an element has a font already, it just changes the name of the font, and preserves the size and style
@@ -25,7 +23,7 @@ public class Lib {
      * @param font The font to enforce
      * @return void
      */
-    public void setFontRecursively(Container container, Font font) {
+    public static void setFontRecursively(Container container, Font font) {
         for (Component component : container.getComponents()) {
             if (component instanceof Container) {
                 setFontRecursively((Container) component, font);
@@ -51,7 +49,7 @@ public class Lib {
         * <li><code>splitPressedJSON("\"minecraft:cobblestone\":5, hello") = ["\"minecraft: cobblestone\"", "5", "hello"]</code></li>
      * </ol>
      */
-    public List<String> splitPressedJSON(String input) {
+    public static List<String> splitPressedJSON(String input) {
         List<String> result = new ArrayList<String>();
 
         Pattern pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
@@ -69,7 +67,7 @@ public class Lib {
         return result;
     }
 
-    public void execute(String... args) {
+    public static void execute(String... args) {
         String joined = "";
         for (String arg : args) joined += arg + " ";
 
@@ -93,5 +91,25 @@ public class Lib {
         } catch(IOException e) {
             e.printStackTrace();
         }
+    }
+
+    public static String fileToString(String filePath) {
+        String out = "";
+        try {
+            BufferedReader reader = new BufferedReader(new InputStreamReader(new java.io.FileInputStream(filePath)));
+            String line;
+            while ((line = reader.readLine()) != null) {
+                out += line;
+            }
+            reader.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return out;
+    }
+
+    public static String doubleToString(double d) {
+        DecimalFormat df = new DecimalFormat("#,###.##");
+        return df.format(d);
     }
 }

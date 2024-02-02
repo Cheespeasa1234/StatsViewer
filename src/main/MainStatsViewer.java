@@ -36,11 +36,11 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     MainPanel mainPanel;
     DefaultListModel<String> listModel;
 
-    Font font = new Font("Helvetica", Font.PLAIN, 16);
+    
 
     void convertFiles(File dir) {
 
-        // parse the level.json
+        // parse the level.dat
         Path inFile = Paths.get(dir + "/world/level.dat");
         Path outFile = Paths.get(dir + "/.statsviewer/world/level.json");
         if (!Files.exists(outFile)) {
@@ -52,20 +52,50 @@ public class MainStatsViewer extends JPanel implements KeyListener {
                 return;
             }
         }
-
-        // convert out of NBT data
-        Lib.getInstance().execute(
+        Lib.execute(
                 "python3",
                 "src/de-nbt.py",
                 inFile.toAbsolutePath().toString(),
                 outFile.toAbsolutePath().toString());
+
+        // parse the playerdata folder
+        inFile = Paths.get(dir + "/world/playerdata");
+        outFile = Paths.get(dir + "/.statsviewer/world/playerdata");
+        if (!Files.exists(outFile)) {
+            try {
+                Files.createDirectories(outFile);
+            } catch (IOException e) {
+                e.printStackTrace();
+                return;
+            }
+        }
+
+        // get every file in the playerdata folder that ends with .dat
+        File[] files = inFile.toFile().listFiles((dir1, name) -> name.endsWith(".dat"));
+        for (File file : files) {
+            Path inFilePath = file.toPath();
+            Path outFilePath = Paths.get(outFile.toAbsolutePath().toString() + "/" + file.getName().replace(".dat", ".json"));
+            if (!Files.exists(outFilePath)) {
+                try {
+                    Files.createFile(outFilePath);
+                } catch (IOException e) {
+                    e.printStackTrace();
+                    return;
+                }
+            }
+            Lib.execute(
+                    "python3",
+                    "src/de-nbt.py",
+                    inFilePath.toAbsolutePath().toString(),
+                    outFilePath.toAbsolutePath().toString());
+        }
 
     }
 
     void createPages() {
 
         // Set the choosing panel
-        blankPanel = new BlankPanel(this.font, file -> {
+        blankPanel = new BlankPanel(Constants.FONT_PRIMARY, file -> {
             convertFiles(file);
             mainPanel.setFile(file);
             setPage(1);
@@ -77,7 +107,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         addPage(blankPanel);
         addPage(mainPanel);
 
-        Lib.getInstance().setFontRecursively(this, this.font);
+        Lib.setFontRecursively(this, Constants.FONT_PRIMARY);
         setPage(0);
 
     }
@@ -87,7 +117,6 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         this.setFocusable(true);
         this.setBackground(Color.WHITE);
         this.addKeyListener(this);
-
 
         try {
             if (System.getProperty("os.name").startsWith("Windows")) {
@@ -102,13 +131,12 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         }
 
         createPages();
-
     }
 
     void addPage(JPanel page) {
         pages.add(page);
         page.setVisible(false);
-        Lib.getInstance().setFontRecursively(page, this.font);
+        Lib.setFontRecursively(page, Constants.FONT_PRIMARY);
         this.add(page);
     }
 
@@ -151,6 +179,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     }
 
     public static void main(String[] args) {
+        System.out.println(Constants.PREF_W + " " + Constants.PREF_H);
+        System.out.println(Constants.TOP_HEIGHT + " " + Constants.BOTTOM_HEIGHT);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();
