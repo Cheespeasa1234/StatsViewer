@@ -32,8 +32,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     void convertFiles(File dir) {
 
         // parse the level.dat
-        Path inFile = Paths.get(dir + "/world/level.dat");
-        Path outFile = Paths.get(dir + "/.statsviewer/world/level.json");
+        Path inFile = Paths.get(dir + "/" + Globals.worldName + "/level.dat");
+        Path outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/level.json");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());
@@ -44,14 +44,14 @@ public class MainStatsViewer extends JPanel implements KeyListener {
             }
         }
         Lib.execute(
-                "python3",
+                Globals.PYTHON_INSTANCE,
                 "src/de-nbt.py",
                 inFile.toAbsolutePath().toString(),
                 outFile.toAbsolutePath().toString());
 
         // parse the playerdata folder
-        inFile = Paths.get(dir + "/world/playerdata");
-        outFile = Paths.get(dir + "/.statsviewer/world/playerdata");
+        inFile = Paths.get(dir + "/" + Globals.worldName + "/playerdata");
+        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/playerdata");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile);
@@ -62,7 +62,14 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         }
 
         // get every file in the playerdata folder that ends with .dat
-        File[] files = inFile.toFile().listFiles((dir1, name) -> name.endsWith(".dat"));
+        File[] allFiles = inFile.toFile().listFiles();
+        ArrayList<File> files = new ArrayList<File>();
+        for (File file : allFiles) {
+            if (file.getName().endsWith(".dat")) {
+                files.add(file);
+            }
+        }
+
         for (File file : files) {
             Path inFilePath = file.toPath();
             Path outFilePath = Paths.get(outFile.toAbsolutePath().toString() + "/" + file.getName().replace(".dat", ".json"));
@@ -75,26 +82,31 @@ public class MainStatsViewer extends JPanel implements KeyListener {
                 }
             }
             Lib.execute(
-                    "python3",
+                    Globals.PYTHON_INSTANCE,
                     "src/de-nbt.py",
                     inFilePath.toAbsolutePath().toString(),
                     outFilePath.toAbsolutePath().toString());
+
+            System.out.println(inFilePath.toAbsolutePath().toString());
+            System.out.println(outFilePath.toAbsolutePath().toString());
         }
 
+
+        // make a copy of the stats files
+        inFile = Paths.get(dir + "/" + Globals.worldName + "/stats");
+        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/stats");
+        try {
+            Lib.copyFolder(inFile, outFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void createPages() {
 
         // Set the choosing panel
-        blankPanel = new BlankPanel(Constants.FONT_PRIMARY, file -> {
-            // find all the subfolders
-            File[] files = file.listFiles(File::isDirectory);
-            for (File f : files) {
-                if (!f.getAbsolutePath().endsWith(".statsviewer")) {
-                    
-                }
-            }
-            
+        blankPanel = new BlankPanel(Globals.FONT_PRIMARY, file -> {
+            System.out.println("File chosen: " + file.getAbsolutePath());
             convertFiles(file);
             statsPanel.setFile(file);
             setPage(1);
@@ -106,7 +118,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         addPage(blankPanel);
         addPage(statsPanel);
 
-        Lib.setFontRecursively(this, Constants.FONT_PRIMARY);
+        Lib.setFontRecursively(this, Globals.FONT_PRIMARY);
         setPage(0);
 
     }
@@ -135,7 +147,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     void addPage(JPanel page) {
         pages.add(page);
         page.setVisible(false);
-        Lib.setFontRecursively(page, Constants.FONT_PRIMARY);
+        Lib.setFontRecursively(page, Globals.FONT_PRIMARY);
         this.add(page);
     }
 
@@ -163,7 +175,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     /* METHODS FOR CREATING JFRAME AND JPANEL */
 
     public Dimension getPreferredSize() {
-        return new Dimension(Constants.PREF_W, Constants.PREF_H);
+        return new Dimension(Globals.PREF_W, Globals.PREF_H);
     }
 
     public static void createAndShowGUI() {
@@ -178,8 +190,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     }
 
     public static void main(String[] args) {
-        System.out.println(Constants.PREF_W + " " + Constants.PREF_H);
-        System.out.println(Constants.TOP_HEIGHT + " " + Constants.BOTTOM_HEIGHT);
+        System.out.println(Globals.PREF_W + " " + Globals.PREF_H);
+        System.out.println(Globals.TOP_HEIGHT + " " + Globals.BOTTOM_HEIGHT);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();

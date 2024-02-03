@@ -1,6 +1,6 @@
 package pages;
 
-import main.Constants;
+import main.Globals;
 import player.MinecraftPlayer;
 
 import java.awt.Dimension;
@@ -42,7 +42,7 @@ public class BottomPanel extends JPanel {
 
         scrollPane = new JScrollPane(itemList);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-        scrollPane.setPreferredSize(new Dimension(175, Constants.BOTTOM_HEIGHT - 100));
+        scrollPane.setPreferredSize(new Dimension(175, Globals.BOTTOM_HEIGHT - 100));
         
         this.add(scrollPane);
         this.add(playerView);

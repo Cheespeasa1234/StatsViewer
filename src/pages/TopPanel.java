@@ -1,6 +1,6 @@
 package pages;
 
-import main.Constants;
+import main.Globals;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -37,7 +37,7 @@ public class TopPanel extends JPanel {
         this.add(statusLabel);
         this.add(loadButton);
         this.add(backButton);
-        this.setPreferredSize(new Dimension(Constants.PREF_W, topHeight));
+        this.setPreferredSize(new Dimension(Globals.PREF_W, topHeight));
         
     }
 }

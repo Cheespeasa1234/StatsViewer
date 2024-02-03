@@ -1,11 +1,14 @@
 package pages;
 
-import main.Constants;
+import main.Globals;
+import main.Lib;
 import player.MinecraftPlayer;
 import player.UsercachePlayer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.datatransfer.Clipboard;
+import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -30,7 +33,7 @@ public class MainPanel extends JPanel {
     ArrayList<MinecraftPlayer> players = new ArrayList<MinecraftPlayer>();
 
     void createTopPanel() {
-        topPanel = new TopPanel(Constants.TOP_HEIGHT, () -> {
+        topPanel = new TopPanel(Globals.TOP_HEIGHT, () -> {
             this.load();
             topPanel.loadButton.setVisible(false);
         }, () -> {
@@ -49,7 +52,7 @@ public class MainPanel extends JPanel {
 
         this.add(topPanel, BorderLayout.NORTH);
         this.add(bottomPanel, BorderLayout.CENTER);
-        this.setPreferredSize(new Dimension(Constants.PREF_W, Constants.PREF_H));
+        this.setPreferredSize(new Dimension(Globals.PREF_W, Globals.PREF_H));
 
     }
 
@@ -59,12 +62,10 @@ public class MainPanel extends JPanel {
     }
 
     public void load() {
-        
+
         long start = System.currentTimeMillis();
-        File playerDataDirectory = new File(server.getAbsolutePath() + "/.statsviewer/world/playerdata");
-        File playerStatsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/world/stats");
-        System.out.println(playerDataDirectory.getAbsolutePath());
-        System.out.println(playerStatsDirectory.getAbsolutePath());
+        File playerDataDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/playerdata");
+        File playerStatsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/stats");
         
         // get a list of cached user
         File usercacheFile = new File(server.getAbsolutePath() + "/usercache.json");
@@ -89,12 +90,14 @@ public class MainPanel extends JPanel {
         for (File playerFile : playerDataFiles) {
             File statsFile = new File(playerStatsDirectory.getAbsolutePath() + "/" + playerFile.getName().replace(".dat", ".json"));
             System.out.println("Reading stats file: " + statsFile.getAbsolutePath());
+            System.out.println("Reading player file: " + playerFile.getAbsolutePath());
             try {
                 Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
                     .create();
 
-                MinecraftPlayer player = gson.fromJson(new BufferedReader(new FileReader(playerFile)), MinecraftPlayer.class);
+                String playerFileString = Lib.fileToString(playerFile.getAbsolutePath());
+                MinecraftPlayer player = gson.fromJson(playerFileString, MinecraftPlayer.class);
                 player.addStatsToMinecraftPlayer(statsFile, server);
                 player.fixUUID();
 

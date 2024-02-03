@@ -1,6 +1,6 @@
 package pages;
 
-import main.Constants;
+import main.Globals;
 import main.Lib;
 import main.ScrollableLabelPanel;
 
@@ -23,12 +23,14 @@ public class PlayerView extends JPanel {
     JTabbedPane statsGroups;
     MinecraftPlayer player = null;
 
+    private final int WIDTH = Globals.PREF_W - 250;
+
     public PlayerView() {
         status = new JLabel("No player.");
         statsGroups = new JTabbedPane();
         this.add(status);
         this.add(statsGroups);
-        this.setPreferredSize(new Dimension(Constants.PREF_W - 200, Constants.BOTTOM_HEIGHT));
+        this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
     }
 
     public JPanel createInventoryPanel(MinecraftPlayer player) {
@@ -37,15 +39,13 @@ public class PlayerView extends JPanel {
         JPanel enderInventoryContainer = new JPanel();
         mainInventoryContainer.setLayout(new BoxLayout(mainInventoryContainer, BoxLayout.Y_AXIS));
         enderInventoryContainer.setLayout(new BoxLayout(enderInventoryContainer, BoxLayout.Y_AXIS));
-        ScrollableLabelPanel mainInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2,
-                Constants.BOTTOM_HEIGHT - 100);
-        ScrollableLabelPanel enderInventoryPanel = new ScrollableLabelPanel((Constants.PREF_W - 200) / 2,
-                Constants.BOTTOM_HEIGHT - 100);
+        ScrollableLabelPanel mainInventoryPanel = new ScrollableLabelPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100);
+        ScrollableLabelPanel enderInventoryPanel = new ScrollableLabelPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100);
         JLabel mainInventoryLabel = new JLabel("Main Inventory");
-        mainInventoryLabel.setFont(Constants.FONT_PRIMARY.deriveFont(24f));
+        mainInventoryLabel.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
         mainInventoryContainer.add(mainInventoryLabel);
         JLabel enderInventoryLabel = new JLabel("Ender Inventory");
-        enderInventoryLabel.setFont(Constants.FONT_PRIMARY.deriveFont(24f));
+        enderInventoryLabel.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
         enderInventoryContainer.add(enderInventoryLabel);
         if (player.mainInventory.size() == 0)
             mainInventoryPanel.addLabel("No items in main inventory");
@@ -68,8 +68,7 @@ public class PlayerView extends JPanel {
         int size = player.stats.get(tabName).size();
         if (size == 0) return null;
 
-        ScrollableLabelPanel scrollableLabelPanel = new ScrollableLabelPanel(Constants.PREF_W - 200,
-                Constants.BOTTOM_HEIGHT - 100);
+        ScrollableLabelPanel scrollableLabelPanel = new ScrollableLabelPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100);
 
         // make the layout so everything is on a new line
         List<HashMap.Entry<String, Double>> entries = new ArrayList<HashMap.Entry<String, Double>>(

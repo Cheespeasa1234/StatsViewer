@@ -2,17 +2,26 @@ package player;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.lang.reflect.Type;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
 import java.util.UUID;
 
 import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonDeserializationContext;
+import com.google.gson.JsonDeserializer;
+import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
+import com.google.gson.JsonParseException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
+import main.Globals;
 import main.Lib;
 
 public class MinecraftPlayer {
@@ -70,11 +79,11 @@ public class MinecraftPlayer {
 
         // Format the statistics before proper parsing
         Lib.execute(
-                "python3",
+                Globals.PYTHON_INSTANCE,
                 "src/format-stat.py",
                 "-I",
                 statsFile.getAbsolutePath(),
-                statsFile.getAbsolutePath().replace("world", ".statsviewer/world"));
+                statsFile.getAbsolutePath().replace(Globals.worldName, ".statsviewer/" + Globals.worldName));
 
         // Parse the document
         Scanner fileScanner = new Scanner(statsFile);
@@ -85,12 +94,53 @@ public class MinecraftPlayer {
         }
         fileScanner.close();
 
-        Gson gson = new Gson();
-        JsonObject jsonObject = gson.fromJson(parsed, JsonObject.class);
-        TypeToken<Map<String, Map<String, Double>>> typeToken = new TypeToken<Map<String, Map<String, Double>>>() {
-        };
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(new TypeToken<Map<String, Map<String, Double>>>() {
+                }.getType(), new CustomMapDeserializer())
+                .create();
 
-        this.stats = gson.fromJson(jsonObject, typeToken.getType());
+        Map<String, Map<String, Double>> stats = gson.fromJson(parsed, new TypeToken<Map<String, Map<String, Double>>>() {
+        }.getType());
+        this.stats = stats;
+
+        Lib.copyTextToClipboard(gson.toJson(stats));
+
+    }
+
+    public class CustomMapDeserializer implements JsonDeserializer<Map<String, Map<String, Double>>> {
+
+        @Override
+        public Map<String, Map<String, Double>> deserialize(JsonElement json, Type typeOfT,
+                JsonDeserializationContext context) throws JsonParseException {
+            Map<String, Map<String, Double>> result = new HashMap<>();
+            JsonObject jsonObject = json.getAsJsonObject();
+
+            if (jsonObject.has("stats")) {
+                JsonObject statsObject = jsonObject.getAsJsonObject("stats");
+
+                for (Map.Entry<String, JsonElement> entry : statsObject.entrySet()) {
+                    String key = entry.getKey();
+                    JsonElement value = entry.getValue();
+
+                    if (value.isJsonObject()) {
+                        // If the value is a JsonObject, deserialize it as usual
+                        result.put(key, context.deserialize(value, Map.class));
+                    } else if (value.isJsonPrimitive() && value.getAsJsonPrimitive().isNumber()) {
+                        // If the value is a JsonPrimitive and is a number, create a Map with a single
+                        // entry
+                        Map<String, Double> singleEntryMap = new HashMap<>();
+                        singleEntryMap.put(key, value.getAsDouble());
+                        result.put(key, singleEntryMap);
+                    } else {
+                        throw new JsonParseException("Unexpected JSON structure for key: " + key);
+                    }
+                }
+            } else {
+                throw new JsonParseException("JSON does not contain the 'stats' key");
+            }
+
+            return result;
+        }
 
     }
 
