@@ -17,9 +17,8 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import blankpanel.BlankPanel;
-import mainpanel.MainPanel;
-
+import pages.BlankPanel;
+import pages.MainPanel;
 
 public class MainStatsViewer extends JPanel implements KeyListener {
 
@@ -27,10 +26,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
     ArrayList<JPanel> pages = new ArrayList<JPanel>();
     BlankPanel blankPanel;
-    MainPanel mainPanel;
+    MainPanel statsPanel;
     DefaultListModel<String> listModel;
-
-    
 
     void convertFiles(File dir) {
 
@@ -90,16 +87,24 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
         // Set the choosing panel
         blankPanel = new BlankPanel(Constants.FONT_PRIMARY, file -> {
+            // find all the subfolders
+            File[] files = file.listFiles(File::isDirectory);
+            for (File f : files) {
+                if (!f.getAbsolutePath().endsWith(".statsviewer")) {
+                    
+                }
+            }
+            
             convertFiles(file);
-            mainPanel.setFile(file);
+            statsPanel.setFile(file);
             setPage(1);
         });
         
         // Set the main panel
-        mainPanel = new MainPanel();
+        statsPanel = new MainPanel();        
         
         addPage(blankPanel);
-        addPage(mainPanel);
+        addPage(statsPanel);
 
         Lib.setFontRecursively(this, Constants.FONT_PRIMARY);
         setPage(0);

@@ -1,4 +1,4 @@
-package blankpanel;
+package pages;
 import java.awt.Dimension;
 import java.awt.Font;
 import java.io.File;

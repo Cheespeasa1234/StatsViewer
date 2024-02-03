@@ -1,4 +1,4 @@
-package mainpanel;
+package pages;
 
 import main.Constants;
 import player.MinecraftPlayer;
