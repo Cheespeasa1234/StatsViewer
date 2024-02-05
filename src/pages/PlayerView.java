@@ -26,7 +26,7 @@ public class PlayerView extends JPanel {
     private final int WIDTH = Globals.PREF_W - 250;
 
     public PlayerView() {
-        status = new JLabel("No player.");
+        status = new JLabel("No player selected.");
         statsGroups = new JTabbedPane();
         this.add(status);
         this.add(statsGroups);
