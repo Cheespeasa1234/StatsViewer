@@ -66,6 +66,7 @@ public class MainPanel extends JPanel {
         long start = System.currentTimeMillis();
         File playerDataDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/playerdata");
         File playerStatsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/stats");
+        File playerAdvancementsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/advancements");
         
         // get a list of cached user
         File usercacheFile = new File(server.getAbsolutePath() + "/usercache.json");
@@ -89,8 +90,7 @@ public class MainPanel extends JPanel {
         File[] playerDataFiles = playerDataDirectory.listFiles();
         for (File playerFile : playerDataFiles) {
             File statsFile = new File(playerStatsDirectory.getAbsolutePath() + "/" + playerFile.getName().replace(".dat", ".json"));
-            System.out.println("Reading stats file: " + statsFile.getAbsolutePath());
-            System.out.println("Reading player file: " + playerFile.getAbsolutePath());
+            File advancementsFile = new File(playerAdvancementsDirectory.getAbsolutePath() + "/" + playerFile.getName().replace(".dat", ".json"));
             try {
                 Gson gson = new GsonBuilder()
                     .excludeFieldsWithoutExposeAnnotation()
@@ -99,6 +99,7 @@ public class MainPanel extends JPanel {
                 String playerFileString = Lib.fileToString(playerFile.getAbsolutePath());
                 MinecraftPlayer player = gson.fromJson(playerFileString, MinecraftPlayer.class);
                 player.addStatsToMinecraftPlayer(statsFile, server);
+                player.addAdvancementsToMinecraftPlayer(advancementsFile, server);
                 player.fixUUID();
 
                 // get the name from the usercache

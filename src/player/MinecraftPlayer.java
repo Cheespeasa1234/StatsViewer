@@ -2,6 +2,7 @@ package player;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.Serial;
 import java.lang.reflect.Type;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +17,6 @@ import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
-import com.google.gson.JsonSyntaxException;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
@@ -25,6 +25,7 @@ import main.Globals;
 import main.Lib;
 
 public class MinecraftPlayer {
+
     @Expose
     @SerializedName("UUID")
     public int[] rawUUID;
@@ -56,32 +57,49 @@ public class MinecraftPlayer {
     @SerializedName("EnderItems")
     public List<Item> enderInventory;
 
+    // Do not expose this property to the serializer
     public transient File serverFile;
 
+    // Properties that the program finds later, not GSON's problem
     public Map<String, Map<String, Double>> stats;
+    public Map<String, Advancement> advancements;
+    @SerializedName("displayName")
     public String name;
-
     @SerializedName("fixedUUID")
     public String UUID;
 
+    /**
+     * Sets the player's UUID, based on the four UUID numbers given in the
+     * deserializer
+     * In a player's JSON, four signed integers are defined. When parsed to hex and
+     * cropped, they make a UUID
+     * A player's UUID is different than the name used in the file names, in some
+     * rare cases
+     * 
+     * @return void
+     */
     public void fixUUID() {
         // turn it into four hex strings
         long mostSigBits = ((long) rawUUID[0] << 32) | (rawUUID[1] & 0xFFFFFFFFL);
         long leastSigBits = ((long) rawUUID[2] << 32) | (rawUUID[3] & 0xFFFFFFFFL);
-
-        UUID fmt = new UUID(mostSigBits, leastSigBits);
+        UUID fmt = new UUID(mostSigBits, leastSigBits); // apparently this is built in? Lol
         this.UUID = fmt.toString();
     }
 
+    /**
+     * Sets the player's statistics, from a file given
+     * 
+     * @param statsFile
+     *            The exact .dat file of the player
+     * @param serverFile
+     *            The server directory
+     */
     public void addStatsToMinecraftPlayer(File statsFile, File serverFile) throws FileNotFoundException {
 
         this.serverFile = serverFile;
 
         // Format the statistics before proper parsing
-        Lib.execute(
-                Globals.PYTHON_INSTANCE,
-                "src/format-stat.py",
-                "-I",
+        Lib.convertNBT(
                 statsFile.getAbsolutePath(),
                 statsFile.getAbsolutePath().replace(Globals.worldName, ".statsviewer/" + Globals.worldName));
 
@@ -95,19 +113,65 @@ public class MinecraftPlayer {
         fileScanner.close();
 
         Gson gson = new GsonBuilder()
-                .registerTypeAdapter(new TypeToken<Map<String, Map<String, Double>>>() {
-                }.getType(), new CustomMapDeserializer())
+                .registerTypeAdapter(new TypeToken<Map<String, Map<String, Double>>>() {}.getType(), new StatisticsDeserializer())
                 .create();
 
-        Map<String, Map<String, Double>> stats = gson.fromJson(parsed, new TypeToken<Map<String, Map<String, Double>>>() {
-        }.getType());
-        this.stats = stats;
+        Map<String, Map<String, Double>> resultMap = gson.fromJson(parsed, new TypeToken<Map<String, Map<String, Double>>>() {}.getType());
 
-        Lib.copyTextToClipboard(gson.toJson(stats));
+        this.stats = resultMap;
+    }
+
+    public void addAdvancementsToMinecraftPlayer(File advancementsFile, File serverFile) throws FileNotFoundException {
+        this.serverFile = serverFile;
+
+        // Parse the document
+        Scanner fileScanner = new Scanner(advancementsFile);
+        String parsed = "";
+        while (fileScanner.hasNextLine()) {
+            String line = fileScanner.nextLine();
+            parsed += line; // removes newlines
+        }
+        fileScanner.close();
+
+        Gson gson = new GsonBuilder()
+                .registerTypeAdapter(new TypeToken<Map<String, Advancement>>() {}.getType(), new AdvancementsDeserializer())
+                .create();
+
+        Map<String, Advancement> resultMap = gson.fromJson(parsed, new TypeToken<Map<String, Advancement>>() {}.getType());
+
+        this.advancements = resultMap;
 
     }
 
-    public class CustomMapDeserializer implements JsonDeserializer<Map<String, Map<String, Double>>> {
+    public class AdvancementsDeserializer implements JsonDeserializer<Map<String, Advancement>> {
+
+        @Override
+        public Map<String, Advancement> deserialize(JsonElement json, Type typeOfT,
+                JsonDeserializationContext context) throws JsonParseException {
+            Map<String, Advancement> result = new HashMap<>();
+            JsonObject jsonObject = json.getAsJsonObject();
+
+
+                for (Map.Entry<String, JsonElement> entry : jsonObject.entrySet()) {
+                    String key = entry.getKey();
+                    JsonElement value = entry.getValue();
+
+                    if (value.isJsonObject()) {
+                        // If the value is a JsonObject, deserialize it as usual
+                        result.put(key, context.deserialize(value, Advancement.class));
+                    } else if (value.isJsonPrimitive()) {
+                        // continue ;)
+                    } else {
+                        throw new JsonParseException("Unexpected JSON structure for key: " + key);
+                    }
+                }
+
+            return result;
+        }
+
+    }
+
+    public class StatisticsDeserializer implements JsonDeserializer<Map<String, Map<String, Double>>> {
 
         @Override
         public Map<String, Map<String, Double>> deserialize(JsonElement json, Type typeOfT,

@@ -73,6 +73,23 @@ public class Lib {
         return result;
     }
 
+    /**
+     * Takes in a .dat file in NBT format, and converts it to a JSON file.
+     * Uses the system's python instance to convert.
+     * @param fileIn The full path of the file to convert
+     * @param fileOut The full path of the location to put the new file
+     * @return void
+     */
+    public static void convertNBT(String fileIn, String fileOut) {
+        Lib.execute(
+            Globals.PYTHON_INSTANCE,
+            "src/format-stat.py",
+            "-I",
+            fileIn,
+            fileOut
+        );
+    }
+
     public static void execute(String... args) {
         String joined = "";
         for (String arg : args) joined += arg + " ";

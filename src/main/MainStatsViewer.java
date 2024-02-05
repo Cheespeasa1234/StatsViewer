@@ -100,6 +100,15 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         } catch (IOException e) {
             e.printStackTrace();
         }
+        
+        // make a copy of the advancements files
+        inFile = Paths.get(dir + "/" + Globals.worldName + "/advancements");
+        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/advancements");
+        try {
+            Lib.copyFolder(inFile, outFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     void createPages() {

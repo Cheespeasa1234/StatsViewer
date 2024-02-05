@@ -6,6 +6,7 @@ import main.ScrollableLabelPanel;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,20 @@ public class PlayerView extends JPanel {
         this.add(status);
         this.add(statsGroups);
         this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
+    }
+
+    public JPanel createAdvancementsPanel(MinecraftPlayer player) {
+        ScrollableLabelPanel panel = new ScrollableLabelPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100);
+        String[] advancementNames = player.advancements.keySet().toArray(new String[0]);
+        Arrays.sort(advancementNames);
+        for (String advancement : advancementNames) {
+            if (player.advancements.get(advancement).done) {
+                panel.addLabel(advancement);
+            }
+        }
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(panel);
+        return mainPanel;
     }
 
     public JPanel createInventoryPanel(MinecraftPlayer player) {
@@ -89,6 +104,7 @@ public class PlayerView extends JPanel {
 
         // make the inventory tab        
         statsGroups.addTab("Inventory", createInventoryPanel(player));
+        statsGroups.addTab("Advancements", createAdvancementsPanel(player));
 
         // get a list of all the maps in the stats
         String[] tabNamesArray = new String[player.stats.keySet().size()];
