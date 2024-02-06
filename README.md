@@ -11,7 +11,7 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
 * Detailed and extensive library of code to make it easy to expand codebase
 
 ## Dependencies
-* Python 3, in path using "python" or "python3"
+* Python 3.8+, in path using "python" or "python3"
 * The pip package "nbtlib"
 * A JDK / JRE able to run Java 17+ programs
 
@@ -153,7 +153,15 @@ MinecraftPlayer player = gson
 
 As seen above, the Gson library does much of the heavy lifting of reading raw JSON files. However, by default, Gson does not handle NBT files, so the `de-nbt.py` script is used to convert the NBT files into JSON files. It can easily be accessed with `Lib.execute("python3", "de-nbt.py", "original.nbt", "new.json")`. The `MinecraftPlayer` class also has many methods to display the information in a human-readable format, and to compare the information with other players.
 
+
+## Acknowledgements
+
 Thank you for reading through the documentation. If you have any questions or comments, reach out to me in the social media platforms in my profile. Submit a bug report or a PR if there are any issues or features you would like to see (or not see). Have a great day!
 
+The liscense for Gson can be viewed [here](licenses/LICENSE_GSON.md). 
+The liscense for nbtlib can be viewed [here](licenses/LICENSE_NBT.md).
+The liscense for this project can be viewed [here](licenses/LICENSE.md).
+
+This project is not affiliated with, endorsed by, or associated with Mojang Studios or Microsoft, thecreators and owners of Minecraft. Minecraft is a trademark of Mojang Studios, and all related assets andintellectual property belong to their respective owners. This project is an independent creation developed by Nathaniel Levison and is not sponsored, authorized, or approved by Mojang Studios or Microsoft.
+
 Nate Levison, February 2024
-```

@@ -209,15 +209,6 @@ public class StatsViewer extends JPanel implements KeyListener {
         JFrame frame = new JFrame("Minecraft Statistics Viewer");
         JPanel gamePanel = new StatsViewer();
 
-        // Load the icon image from a file or resource
-        String path = "icon.png";
-        ImageIcon icon = null;
-        URL imgURL = StatsViewer.class.getResource(path);
-        if (imgURL != null) {
-            icon = new ImageIcon(imgURL);
-            frame.setIconImage(icon.getImage());
-        }
-
         frame.getContentPane().add(gamePanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
