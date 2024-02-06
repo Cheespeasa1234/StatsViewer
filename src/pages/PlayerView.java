@@ -2,7 +2,7 @@ package pages;
 
 import main.Globals;
 import main.Lib;
-import main.ScrollableLabelPanel;
+import main.ListPanel;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -16,6 +16,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 
+import player.Advancement;
 import player.Item;
 import player.MinecraftPlayer;
 
@@ -35,12 +36,16 @@ public class PlayerView extends JPanel {
     }
 
     public JPanel createAdvancementsPanel(MinecraftPlayer player) {
-        ScrollableLabelPanel panel = new ScrollableLabelPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100);
+        ListPanel panel = new ListPanel(
+            WIDTH, Globals.BOTTOM_HEIGHT - 100,
+            ListPanel.ALL_AZ_OPTIONS, ListPanel.SORT_AZ
+        );
         String[] advancementNames = player.advancements.keySet().toArray(new String[0]);
         Arrays.sort(advancementNames);
         for (String advancement : advancementNames) {
-            if (player.advancements.get(advancement).done) {
-                panel.addLabel(advancement);
+            Advancement a = player.advancements.get(advancement);
+            if (a.done) {
+                panel.addLabel(advancement + ": " + Lib.getTimeSince(a.getCompleted()), 0);
             }
         }
         JPanel mainPanel = new JPanel();
@@ -54,24 +59,27 @@ public class PlayerView extends JPanel {
         JPanel enderInventoryContainer = new JPanel();
         mainInventoryContainer.setLayout(new BoxLayout(mainInventoryContainer, BoxLayout.Y_AXIS));
         enderInventoryContainer.setLayout(new BoxLayout(enderInventoryContainer, BoxLayout.Y_AXIS));
-        ScrollableLabelPanel mainInventoryPanel = new ScrollableLabelPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100);
-        ScrollableLabelPanel enderInventoryPanel = new ScrollableLabelPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100);
+        ListPanel mainInventoryPanel = new ListPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100,
+                ListPanel.ALL_OPTIONS, ListPanel.SORT_SLOT_MOST);
+        ListPanel enderInventoryPanel = new ListPanel(WIDTH / 2 - 25, Globals.BOTTOM_HEIGHT - 100,
+                ListPanel.ALL_OPTIONS, ListPanel.SORT_SLOT_MOST);
         JLabel mainInventoryLabel = new JLabel("Main Inventory");
         mainInventoryLabel.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
         mainInventoryContainer.add(mainInventoryLabel);
         JLabel enderInventoryLabel = new JLabel("Ender Inventory");
         enderInventoryLabel.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
         enderInventoryContainer.add(enderInventoryLabel);
+
         if (player.mainInventory.size() == 0)
-            mainInventoryPanel.addLabel("No items in main inventory");
+            mainInventoryPanel.addLabel("No items in main inventory", 0);
         else
             for (Item item : player.mainInventory)
-                mainInventoryPanel.addLabel(item.toFancyString());
+                mainInventoryPanel.addLabel(item.toFancyString(), item.count, item.slot);
         if (player.enderInventory.size() == 0)
-            enderInventoryPanel.addLabel("No items in ender inventory");
+            enderInventoryPanel.addLabel("No items in ender inventory", 0);
         else
             for (Item item : player.enderInventory)
-                enderInventoryPanel.addLabel(item.toFancyString());
+                enderInventoryPanel.addLabel(item.toFancyString(), item.count, item.slot);
         mainInventoryContainer.add(mainInventoryPanel);
         enderInventoryContainer.add(enderInventoryPanel);
         inventoryPanel.add(mainInventoryContainer);
@@ -79,30 +87,34 @@ public class PlayerView extends JPanel {
         return inventoryPanel;
     }
 
-    public ScrollableLabelPanel createStatsTab(String tabName) {
+    public JPanel createStatsTab(String tabName) {
         int size = player.stats.get(tabName).size();
-        if (size == 0) return null;
+        if (size == 0)
+            return null;
 
-        ScrollableLabelPanel scrollableLabelPanel = new ScrollableLabelPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100);
+        ListPanel scrollableLabelPanel = new ListPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100);
 
         // make the layout so everything is on a new line
         List<HashMap.Entry<String, Double>> entries = new ArrayList<HashMap.Entry<String, Double>>(
                 player.stats.get(tabName).entrySet());
         entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
         for (HashMap.Entry<String, Double> entry : entries) {
-            scrollableLabelPanel.addLabel(entry.getKey() + ": " + Lib.doubleToString(entry.getValue()));
+            scrollableLabelPanel.addLabel(entry.getKey() + ": " + Lib.doubleToString(entry.getValue()),
+                    entry.getValue());
         }
 
-        return scrollableLabelPanel;
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(scrollableLabelPanel);
+        return mainPanel;
     }
-    
+
     public void setPlayer(MinecraftPlayer player) {
 
         // reset everything
         this.player = player;
         statsGroups.removeAll();
 
-        // make the inventory tab        
+        // make the inventory tab
         statsGroups.addTab("Inventory", createInventoryPanel(player));
         statsGroups.addTab("Advancements", createAdvancementsPanel(player));
 
@@ -111,14 +123,9 @@ public class PlayerView extends JPanel {
         player.stats.keySet().toArray(tabNamesArray);
 
         for (int i = 0; i < tabNamesArray.length; i++) {
-
             String tabName = tabNamesArray[i];
-            String tabEntryCount = " (" + player.stats.get(tabName).size() + ")";
-
-            ScrollableLabelPanel scrollableLabelPanel = createStatsTab(tabName);
-            if (scrollableLabelPanel == null) continue;
-
-            statsGroups.addTab(tabName.substring(tabName.indexOf(":") + 1) + tabEntryCount, scrollableLabelPanel);
+            JPanel panel = createStatsTab(tabName);
+            statsGroups.addTab(tabName.substring(tabName.indexOf(":") + 1), panel);
         }
         status.setText("Current Player: " + player.getName());
         status.setVisible(true);

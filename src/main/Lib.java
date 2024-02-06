@@ -3,15 +3,20 @@ import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 import java.io.BufferedReader;
+import java.io.File;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.nio.file.FileVisitResult;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.nio.file.SimpleFileVisitor;
 import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.text.DecimalFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -158,6 +163,71 @@ public class Lib {
         java.awt.datatransfer.StringSelection stringSelection = new java.awt.datatransfer.StringSelection(text);
         java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, null);
+    }
+
+    public static String getTimeSince(String datetime) {
+        // Parse the input datetime string
+        LocalDateTime inputDateTime = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+
+        // Calculate the time difference
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        long years = ChronoUnit.YEARS.between(inputDateTime, currentDateTime);
+        long months = ChronoUnit.MONTHS.between(inputDateTime, currentDateTime);
+        long days = ChronoUnit.DAYS.between(inputDateTime, currentDateTime);
+        long hours = ChronoUnit.HOURS.between(inputDateTime, currentDateTime);
+        long minutes = ChronoUnit.MINUTES.between(inputDateTime, currentDateTime);
+        long seconds = ChronoUnit.SECONDS.between(inputDateTime, currentDateTime);
+
+        // Choose the appropriate unit for the time difference
+        if (years > 0) {
+            return years + " year(s) ago";
+        } else if (months > 0) {
+            return months + " month(s) ago";
+        } else if (days > 0) {
+            return days + " day(s) ago";
+        } else if (hours > 0) {
+            return hours + " hour(s) ago";
+        } else if (minutes > 0) {
+            return minutes + " minute(s) ago";
+        } else {
+            return seconds + " second(s) ago";
+        }
+    }
+
+    public static void saveRecentDirectories(List<String> directories) {
+        try {
+            Path filePath = Paths.get(Globals.RECENTS_FILE_PATH);
+            Files.write(filePath, directories);
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception as needed
+        }
+    }
+
+    public static List<String> readRecentDirectories() {
+        List<String> directories = new ArrayList<>();
+        try {
+            Path filePath = Paths.get(Globals.RECENTS_FILE_PATH);
+            if (Files.exists(filePath)) {
+                directories = Files.readAllLines(filePath);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            // Handle the exception as needed
+        }
+        return directories;
+    }
+
+    public static void addRecent(String dir) {
+        List<String> recent = readRecentDirectories();
+        if (recent.contains(dir)) {
+            recent.remove(dir);
+        }
+        recent.add(0, dir);
+        if (recent.size() > 5) {
+            recent.remove(5);
+        }
+        saveRecentDirectories(recent);
     }
 
 }

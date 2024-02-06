@@ -11,8 +11,6 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import com.google.gson.Gson;
-
 import main.Lib;
 import main.Globals;
 
@@ -81,8 +79,60 @@ public class BlankPanel extends JPanel {
                 System.out.println("World name: " + Globals.worldName);
 
                 this.fileChosenListener.onFileChosen(serverDirectory);
+                Lib.addRecent(serverDirectory.getAbsolutePath());
             }
 
+        });
+        this.prevButton.addActionListener(e -> {
+            String[] recentDirectories = Lib.readRecentDirectories().toArray(new String[0]);
+            String chosen = (String) JOptionPane.showInputDialog(
+                    this,
+                    "Select a recent directory",
+                    "Recent Directories",
+                    JOptionPane.PLAIN_MESSAGE,
+                    null,
+                    recentDirectories,
+                    recentDirectories[0]);
+            if (chosen != null) {
+                this.serverDirectory = new File(chosen);
+                this.label.setText("Server directory: " + serverDirectory.getAbsolutePath());
+
+                // find all subdirectories of the current directory
+                File[] allFiles = this.serverDirectory.listFiles();
+                ArrayList<String> worldCandidates = new ArrayList<String>();
+
+                for (File file : allFiles) {
+                    // if it is a dir and doesn't start with a .
+                    if (file.isDirectory() && !file.getName().startsWith(".")) {
+                        // if it has a level.dat
+                        if (new File(file.getAbsolutePath() + "/level.dat").exists()) {
+                            worldCandidates.add(file.getAbsolutePath());
+                        }
+                    }
+                }
+                // make a JOptionPane to select one of the worldCandidates
+                String worldFile = (String) JOptionPane.showInputDialog(
+                        this,
+                        "Select a world",
+                        "World Selection",
+                        JOptionPane.PLAIN_MESSAGE,
+                        null,
+                        worldCandidates.toArray(),
+                        worldCandidates.get(0));
+
+                Globals.worldName = "world";
+                if (worldFile != null) {
+                    System.out.println("World file: " + worldFile);
+                    int lastForwardSlashIndex = worldFile.lastIndexOf('/');
+                    int lastBackwardSlashIndex = worldFile.lastIndexOf('\\');
+                    int lastSlash = Math.max(lastForwardSlashIndex, lastBackwardSlashIndex);
+                    Globals.worldName = worldFile.substring(lastSlash + 1);
+                }
+                System.out.println("World name: " + Globals.worldName);
+
+                this.fileChosenListener.onFileChosen(serverDirectory);
+                Lib.addRecent(serverDirectory.getAbsolutePath());
+            }
         });
 
         this.buttonGroup = new JPanel();

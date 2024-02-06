@@ -27,19 +27,31 @@ import main.Lib;
 public class MinecraftPlayer {
 
     @Expose
+    @SerializedName("SpawnX")
+    public double spawnX;
+
+    @Expose
+    @SerializedName("SpawnY")
+    public double spawnY;
+
+    @Expose
+    @SerializedName("SpawnZ")
+    public double spawnZ;
+
+    @Expose
     @SerializedName("UUID")
     public int[] rawUUID;
 
     @Expose
     @SerializedName("Pos")
-    public double[] pos;
+    public double[] position;
 
     @Expose
     @SerializedName("Dimension")
     public String dimension;
 
     @SerializedName("Motion")
-    public double[] motion;
+    public double[] velocity;
 
     @Expose
     @SerializedName("Rotation")

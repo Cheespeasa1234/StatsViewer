@@ -64,9 +64,9 @@ public class MainPanel extends JPanel {
     public void load() {
 
         long start = System.currentTimeMillis();
-        File playerDataDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/playerdata");
-        File playerStatsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/stats");
-        File playerAdvancementsDirectory = new File(server.getAbsolutePath() + "/.statsviewer/" + Globals.worldName + "/advancements");
+        File playerDataDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/playerdata");
+        File playerStatsDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/stats");
+        File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/advancements");
         
         // get a list of cached user
         File usercacheFile = new File(server.getAbsolutePath() + "/usercache.json");

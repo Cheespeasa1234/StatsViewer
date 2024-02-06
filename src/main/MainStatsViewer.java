@@ -5,12 +5,14 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
+import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -32,8 +34,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     void convertFiles(File dir) {
 
         // parse the level.dat
-        Path inFile = Paths.get(dir + "/" + Globals.worldName + "/level.dat");
-        Path outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/level.json");
+        Path inFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/level.dat");
+        Path outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/level.json");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());
@@ -51,7 +53,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
         // parse the playerdata folder
         inFile = Paths.get(dir + "/" + Globals.worldName + "/playerdata");
-        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/playerdata");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/playerdata");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile);
@@ -94,7 +96,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
         // make a copy of the stats files
         inFile = Paths.get(dir + "/" + Globals.worldName + "/stats");
-        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/stats");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/stats");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {
@@ -103,7 +105,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         
         // make a copy of the advancements files
         inFile = Paths.get(dir + "/" + Globals.worldName + "/advancements");
-        outFile = Paths.get(dir + "/.statsviewer/" + Globals.worldName + "/advancements");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/advancements");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {
@@ -191,6 +193,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         JFrame frame = new JFrame("Minecraft Statistics Viewer");
         JPanel gamePanel = new MainStatsViewer();
 
+        setApplicationIcon(frame);
+
         frame.getContentPane().add(gamePanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
@@ -198,7 +202,32 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         frame.setVisible(true);
     }
 
+    private static void setApplicationIcon(JFrame frame) {
+        // Load the icon image from a file or resource
+        ImageIcon icon = createImageIcon("icon.png");
+
+        // Set the icon for the JFrame
+        if (icon != null) {
+            System.out.println("Icon set");
+            frame.setIconImage(icon.getImage());
+        }
+    }
+
+    private static ImageIcon createImageIcon(String path) {
+        URL imageURL = MainStatsViewer.class.getResource(path);
+        if (imageURL != null) {
+            System.out.println(imageURL.toString());
+            return new ImageIcon(imageURL);
+        } else {
+            System.err.println("Resource not found: " + path);
+            return null;
+        }
+    }
+
     public static void main(String[] args) {
+
+        DependencyChecker.checkDependencies();
+
         System.out.println(Globals.PREF_W + " " + Globals.PREF_H);
         System.out.println(Globals.TOP_HEIGHT + " " + Globals.BOTTOM_HEIGHT);
         SwingUtilities.invokeLater(new Runnable() {
