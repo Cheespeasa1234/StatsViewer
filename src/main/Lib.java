@@ -29,7 +29,24 @@ import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
 
+/**
+ * This class contains various utility methods used throughout the program
+ * It contains methods for setting the font of all components, converting NBT
+ * files to JSON, and more
+ * It also contains methods for copying files and folders, formatting numbers,
+ * and more
+ * 
+ * @see main.StatsViewer
+ * @see main.Globals
+ * @see main.DependencyChecker
+ * @see main.StatsViewer
+ * @author Nate Levison, February 2024
+ */
 public class Lib {
+
+    public static String getLocation() {
+        return Globals.STATS_VIEWER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME;
+    }
 
     /**
      * Sets the font of all children, and their children, and so on, of all
@@ -38,8 +55,10 @@ public class Lib {
      * preserves the size and style
      * If an element has no font, it gets the whole font.
      * 
-     * @param container The swing component to modify
-     * @param font The font to enforce
+     * @param container
+     *            The swing component to modify
+     * @param font
+     *            The font to enforce
      * @return void
      */
     public static void setFontRecursively(Container container, Font font) {
@@ -62,7 +81,9 @@ public class Lib {
     /**
      * Splits a string into tokens, based on how JSON is formatted.
      * Splits by all commas, and colons only if the colon isn't in between quotes.
-     * Examples:<pre>
+     * Examples:
+     * 
+     * <pre>
      * <br>splitPressedJSON("\"minecraft:cobblestone\":5") = ["\"minecraft: cobblestone\"", "5"]
      * <br>splitPressedJSON("\"minecraft:cobblestone\":5,"\"minecraft:ender_pearl\":18923, hello") = ["\"minecraft: cobblestone\"", "5", "\"minecraft:ender_pearl\"", "18923", "hello"]
      * <br>splitPressedJSON("\"minecraft:cobblestone\":5, hello") = ["\"minecraft: cobblestone\"", "5", "hello"]
@@ -107,6 +128,13 @@ public class Lib {
                 fileOut);
     }
 
+    /**
+     * Executes a given command in a new process, and prints the stdout and stderr
+     * 
+     * @param args
+     *            The command to execute
+     * @return void
+     */
     public static void execute(String... args) {
         String joined = "";
         for (String arg : args)
@@ -136,6 +164,13 @@ public class Lib {
         }
     }
 
+    /**
+     * Reads the contents of a file into a string
+     * 
+     * @param filePath
+     *            The full path of the file to read
+     * @return The contents of the file as a string
+     */
     public static String fileToString(String filePath) {
         String out = "";
         try {
@@ -151,11 +186,31 @@ public class Lib {
         return out;
     }
 
+    /**
+     * Formats a given double into a human-readable format
+     * Used for the statistics tabs, to format very large numbers
+     * 
+     * @param d
+     *            The double to format
+     * @return The formatted string
+     */
     public static String doubleToString(double d) {
         DecimalFormat df = new DecimalFormat("#,###.##");
         return df.format(d);
     }
 
+    /**
+     * Copies the full contents of a folder to another folder
+     * Recursively copies all files and subdirectories
+     * 
+     * @param source
+     *            The full path of the source folder
+     * @param target
+     *            The full path of the target folder
+     * @return void
+     * @throws IOException
+     *             If the source or target folder cannot be accessed
+     */
     public static void copyFolder(Path source, Path target) throws IOException {
         // Copy the folder and its contents recursively
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
@@ -174,12 +229,29 @@ public class Lib {
         });
     }
 
+    /**
+     * Copies the given text to the system clipboard
+     * 
+     * @param text
+     *            The text to copy
+     * @return void
+     */
     public static void copyTextToClipboard(String text) {
         java.awt.datatransfer.StringSelection stringSelection = new java.awt.datatransfer.StringSelection(text);
         java.awt.datatransfer.Clipboard clipboard = java.awt.Toolkit.getDefaultToolkit().getSystemClipboard();
         clipboard.setContents(stringSelection, null);
     }
 
+    /**
+     * Returns a human-readable string representing the time difference between the
+     * input datetime and the current datetime
+     * The datetime is as given in the advancements files, in the format "yyyy-MM-dd
+     * HH:mm:ss -500"
+     * 
+     * @param datetime
+     *            The datetime to compare
+     * @return The time difference as a string
+     */
     public static String getTimeSince(String datetime) {
         // Parse the input datetime string
         LocalDateTime inputDateTime = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
@@ -209,6 +281,15 @@ public class Lib {
         }
     }
 
+    /**
+     * Saves a list of directories to the recent directories file
+     * Used to later display the recent directories in the file menu
+     * 
+     * @see readRecentDirectories
+     * @param directories
+     *            The list of directories to save
+     * @return void
+     */
     public static void saveRecentDirectories(List<String> directories) {
         try {
             Path filePath = Paths.get(Globals.RECENTS_FILE_PATH);
@@ -219,6 +300,13 @@ public class Lib {
         }
     }
 
+    /**
+     * Reads the recent directories from the recent directories file
+     * Used to later display the recent directories in the file menu
+     * 
+     * @see saveRecentDirectories
+     * @return The list of recent directories
+     */
     public static List<String> readRecentDirectories() {
         List<String> directories = new ArrayList<>();
         try {
@@ -233,6 +321,16 @@ public class Lib {
         return directories;
     }
 
+    /**
+     * Adds a directory to the list of recent directories
+     * Used to later display the recent directories in the file menu
+     * 
+     * @see readRecentDirectories
+     * @see saveRecentDirectories
+     * @param dir
+     *            The directory to add
+     * @return void
+     */
     public static void addRecent(String dir) {
         List<String> recent = readRecentDirectories();
         if (recent.contains(dir)) {

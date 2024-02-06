@@ -2,6 +2,15 @@ package main;
 
 import javax.swing.JLabel;
 
+/**
+ * A JLabel that can be sorted by certain criteria
+ * Can be sorted by name, count, or slot
+ * Used in the {@link ListPanel} component as a Label
+ * 
+ * @see ListPanel
+ * @see ListPanel#sortList()
+ * @author Nate Levison, February 2024
+ */
 public class QuantityLabel extends JLabel {
     public double count;
     public int slot;

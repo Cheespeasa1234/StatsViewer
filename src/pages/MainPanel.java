@@ -7,8 +7,6 @@ import player.UsercachePlayer;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
-import java.awt.datatransfer.Clipboard;
-import java.awt.datatransfer.StringSelection;
 import java.io.BufferedReader;
 import java.io.File;
 import java.io.FileNotFoundException;
@@ -64,9 +62,9 @@ public class MainPanel extends JPanel {
     public void load() {
 
         long start = System.currentTimeMillis();
-        File playerDataDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/playerdata");
-        File playerStatsDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/stats");
-        File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/advancements");
+        File playerDataDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/playerdata");
+        File playerStatsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/stats");
+        File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/advancements");
         
         // get a list of cached user
         File usercacheFile = new File(server.getAbsolutePath() + "/usercache.json");
@@ -97,17 +95,12 @@ public class MainPanel extends JPanel {
                     .create();
 
                 String playerFileString = Lib.fileToString(playerFile.getAbsolutePath());
-                MinecraftPlayer player = gson.fromJson(playerFileString, MinecraftPlayer.class);
-                player.addStatsToMinecraftPlayer(statsFile, server);
-                player.addAdvancementsToMinecraftPlayer(advancementsFile, server);
-                player.fixUUID();
-
-                // get the name from the usercache
-                for (UsercachePlayer usercachePlayer : usercache) {
-                    if (usercachePlayer.UUID.equals(player.UUID)) {
-                        player.name = usercachePlayer.name;
-                    }
-                }
+                MinecraftPlayer player = gson
+                    .fromJson(playerFileString, MinecraftPlayer.class)
+                    .addUUID()
+                    .addName(usercache)
+                    .addStats(statsFile, server)
+                    .addAdvancements(advancementsFile, server);
 
                 System.out.println("Created player: " + player.UUID + " with fileid: " + playerFile.getName());
 

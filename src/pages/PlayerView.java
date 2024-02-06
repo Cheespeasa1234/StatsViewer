@@ -73,13 +73,19 @@ public class PlayerView extends JPanel {
         if (player.mainInventory.size() == 0)
             mainInventoryPanel.addLabel("No items in main inventory", 0);
         else
-            for (Item item : player.mainInventory)
-                mainInventoryPanel.addLabel(item.toFancyString(), item.count, item.slot);
+            for (Item item : player.mainInventory) {
+                String[] lines = item.toFancyString();
+                for (String line : lines)
+                    mainInventoryPanel.addLabel(line, item.count, item.slot);
+            }
         if (player.enderInventory.size() == 0)
             enderInventoryPanel.addLabel("No items in ender inventory", 0);
         else
-            for (Item item : player.enderInventory)
-                enderInventoryPanel.addLabel(item.toFancyString(), item.count, item.slot);
+            for (Item item : player.enderInventory) {
+                String[] lines = item.toFancyString();
+                for (String line : lines)
+                    enderInventoryPanel.addLabel(line, item.count, item.slot);
+            }
         mainInventoryContainer.add(mainInventoryPanel);
         enderInventoryContainer.add(enderInventoryPanel);
         inventoryPanel.add(mainInventoryContainer);

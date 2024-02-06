@@ -23,6 +23,21 @@ import javax.swing.UnsupportedLookAndFeelException;
 import pages.BlankPanel;
 import pages.MainPanel;
 
+/**
+ * The main class for the Minecraft Statistics Viewer
+ * It also contains the methods for creating the JFrame and JPanel for the
+ * program
+ * Keeps track of open directory, pages, and the list model
+ * 
+ * @see DependencyChecker
+ * @see BlankPanel
+ * @see MainPanel
+ * @see Globals
+ * @see Lib
+ * @version 1.0
+ * @since 1.0
+ * @author Nate Levison, February 2024
+ */
 public class StatsViewer extends JPanel implements KeyListener {
 
     File serverDirectory = null;
@@ -35,8 +50,8 @@ public class StatsViewer extends JPanel implements KeyListener {
     private void convertFiles(File dir) {
 
         // parse the level.dat
-        Path inFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/level.dat");
-        Path outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/level.json");
+        Path inFile = Paths.get(dir + Lib.getLocation() + "/level.dat");
+        Path outFile = Paths.get(dir + Lib.getLocation() + "/level.json");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());
@@ -54,7 +69,7 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // parse the playerdata folder
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/playerdata");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/playerdata");
+        outFile = Paths.get(dir + Lib.getLocation() + "/playerdata");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile);
@@ -97,7 +112,7 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // make a copy of the stats files
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/stats");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/stats");
+        outFile = Paths.get(dir + Lib.getLocation() + "/stats");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {
@@ -106,7 +121,7 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // make a copy of the advancements files
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/advancements");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/advancements");
+        outFile = Paths.get(dir + Lib.getLocation() + "/advancements");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {

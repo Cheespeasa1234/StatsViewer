@@ -6,8 +6,19 @@ import java.io.InputStreamReader;
 
 import javax.swing.JOptionPane;
 
+/**
+ * This class checks if the required dependencies are available on the system
+ * Handles all the checks for the required dependencies
+ * Dependencies:
+ * - Python / Python 3
+ * - pip / pip3
+ * - nbtlib
+ * @author Nate Levison, February 2024, February 2024
+ */
 public class DependencyChecker {
-    public static boolean isPythonAvailable() {
+
+
+    private static boolean isPythonAvailable() {
         boolean isAvailable = false;
         try {
             // Attempt to run the "python --version" command
@@ -35,7 +46,7 @@ public class DependencyChecker {
         return isAvailable;
     }
 
-    public static boolean isPython3Available() {
+    private static boolean isPython3Available() {
         boolean isAvailable = false;
         try {
             // Attempt to run the "python --version" command
@@ -63,7 +74,7 @@ public class DependencyChecker {
         return isAvailable;
     }
 
-    public static boolean isNbtlibPackageAvailable() {
+    private static boolean isNbtlibPackageAvailable() {
         boolean isAvailable = false;
         try {
             // Attempt to run the "pip show nbtlib" command
@@ -97,7 +108,7 @@ public class DependencyChecker {
         return isAvailable;
     }
 
-    public static boolean isNbtlib3PackageAvailable() {
+    private static boolean isNbtlib3PackageAvailable() {
         boolean isAvailable = false;
         try {
             // Attempt to run the "pip show nbtlib" command

@@ -7,6 +7,13 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
+/**
+ * Probably the greatest example of how Java is fucked
+ * A deserialized item as parsed by Gson
+ * 
+ * @see MinecraftPlayer
+ * @author Nate Levison, February 2024
+ */
 public class Item {
 
     @Expose
@@ -90,6 +97,11 @@ public class Item {
         public String title;
         @Expose
         public Integer resolved;
+
+        // potions
+        @Expose
+        @SerializedName("Potion")
+        public String potion;
 
         public class Display {
             @Expose
@@ -176,6 +188,19 @@ public class Item {
         }
     }
 
+    public String getCustomName() {
+        if (this.tag != null && this.tag.display != null) {
+            String name = this.tag.display.name;
+            if (name.startsWith("{") && name.endsWith("}")) {
+                return " " + name.substring(8, name.length() - 1);
+            } else {
+                return " " + name;
+            }
+        } else {
+            return "";
+        }
+    }
+
     private static String toString(Object o) {
         Gson gson = new GsonBuilder()
                 .disableHtmlEscaping()
@@ -187,7 +212,23 @@ public class Item {
         return toString(this);
     }
 
-    public String toFancyString() {
+    public String toFancyStringBlockEntity() {
+
+        String count = (this.count > 1) ? ("x" + this.count + " ") : "";
+        String damage = "";
+        String repairCost = "";
+        String tag = (this.tag != null) ? toString(this.tag) : "";
+        if (this.damage > 0) {
+            damage = " with " + damage + " damage";
+        }
+        if (this.repairCost > 0) {
+            repairCost = " with " + repairCost + " repair cost";
+        }
+        return count + getCustomName() + " " + this.id + damage + repairCost + tag;
+    }
+
+    public String[] toFancyString() {
+
         String count = (this.count > 1) ? ("x" + this.count + " ") : "";
         String damage = "";
         String repairCost = "";
@@ -212,7 +253,19 @@ public class Item {
             slot = "(offhand)";
         }
 
-        return slot + " " + count + id + damage + repairCost + tag;
+        String line = slot + getCustomName() + " " + count + this.id + damage + repairCost + tag;
+        boolean hasItems = this.tag != null && this.tag.blockEntityTag != null && this.tag.blockEntityTag.items != null;
+
+        if (!hasItems) {
+            return new String[] { line };
+        }
+
+        String[] lines = new String[this.tag.blockEntityTag.items.length + 1];
+        lines[0] = line;
+        for (int i = 0; i < this.tag.blockEntityTag.items.length; i++) {
+            lines[i + 1] = "    " + this.tag.blockEntityTag.items[i].toFancyStringBlockEntity();
+        }
+        return lines;
     }
 
     public static void printInventoryContents(List<List<Item>> inventories) {
