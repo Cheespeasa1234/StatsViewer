@@ -68,15 +68,15 @@ public class BlankPanel extends JPanel {
                         worldCandidates.toArray(),
                         worldCandidates.get(0));
 
-                Globals.worldName = "world";
+                Globals.OPEN_WORLD_NAME = "world";
                 if (worldFile != null) {
                     System.out.println("World file: " + worldFile);
                     int lastForwardSlashIndex = worldFile.lastIndexOf('/');
                     int lastBackwardSlashIndex = worldFile.lastIndexOf('\\');
                     int lastSlash = Math.max(lastForwardSlashIndex, lastBackwardSlashIndex);
-                    Globals.worldName = worldFile.substring(lastSlash + 1);
+                    Globals.OPEN_WORLD_NAME = worldFile.substring(lastSlash + 1);
                 }
-                System.out.println("World name: " + Globals.worldName);
+                System.out.println("World name: " + Globals.OPEN_WORLD_NAME);
 
                 this.fileChosenListener.onFileChosen(serverDirectory);
                 Lib.addRecent(serverDirectory.getAbsolutePath());
@@ -120,15 +120,15 @@ public class BlankPanel extends JPanel {
                         worldCandidates.toArray(),
                         worldCandidates.get(0));
 
-                Globals.worldName = "world";
+                Globals.OPEN_WORLD_NAME = "world";
                 if (worldFile != null) {
                     System.out.println("World file: " + worldFile);
                     int lastForwardSlashIndex = worldFile.lastIndexOf('/');
                     int lastBackwardSlashIndex = worldFile.lastIndexOf('\\');
                     int lastSlash = Math.max(lastForwardSlashIndex, lastBackwardSlashIndex);
-                    Globals.worldName = worldFile.substring(lastSlash + 1);
+                    Globals.OPEN_WORLD_NAME = worldFile.substring(lastSlash + 1);
                 }
-                System.out.println("World name: " + Globals.worldName);
+                System.out.println("World name: " + Globals.OPEN_WORLD_NAME);
 
                 this.fileChosenListener.onFileChosen(serverDirectory);
                 Lib.addRecent(serverDirectory.getAbsolutePath());

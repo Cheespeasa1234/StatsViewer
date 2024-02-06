@@ -113,7 +113,7 @@ public class MinecraftPlayer {
         // Format the statistics before proper parsing
         Lib.convertNBT(
                 statsFile.getAbsolutePath(),
-                statsFile.getAbsolutePath().replace(Globals.worldName, ".statsviewer/" + Globals.worldName));
+                statsFile.getAbsolutePath().replace(Globals.OPEN_WORLD_NAME, ".statsviewer/" + Globals.OPEN_WORLD_NAME));
 
         // Parse the document
         Scanner fileScanner = new Scanner(statsFile);

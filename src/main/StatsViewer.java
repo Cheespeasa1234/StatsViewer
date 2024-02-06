@@ -1,4 +1,5 @@
 package main;
+
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.event.KeyEvent;
@@ -22,7 +23,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import pages.BlankPanel;
 import pages.MainPanel;
 
-public class MainStatsViewer extends JPanel implements KeyListener {
+public class StatsViewer extends JPanel implements KeyListener {
 
     File serverDirectory = null;
 
@@ -31,11 +32,11 @@ public class MainStatsViewer extends JPanel implements KeyListener {
     MainPanel statsPanel;
     DefaultListModel<String> listModel;
 
-    void convertFiles(File dir) {
+    private void convertFiles(File dir) {
 
         // parse the level.dat
-        Path inFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/level.dat");
-        Path outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/level.json");
+        Path inFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/level.dat");
+        Path outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/level.json");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());
@@ -52,8 +53,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
                 outFile.toAbsolutePath().toString());
 
         // parse the playerdata folder
-        inFile = Paths.get(dir + "/" + Globals.worldName + "/playerdata");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/playerdata");
+        inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/playerdata");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/playerdata");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile);
@@ -74,7 +75,8 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
         for (File file : files) {
             Path inFilePath = file.toPath();
-            Path outFilePath = Paths.get(outFile.toAbsolutePath().toString() + "/" + file.getName().replace(".dat", ".json"));
+            Path outFilePath = Paths
+                    .get(outFile.toAbsolutePath().toString() + "/" + file.getName().replace(".dat", ".json"));
             if (!Files.exists(outFilePath)) {
                 try {
                     Files.createFile(outFilePath);
@@ -93,19 +95,18 @@ public class MainStatsViewer extends JPanel implements KeyListener {
             System.out.println(outFilePath.toAbsolutePath().toString());
         }
 
-
         // make a copy of the stats files
-        inFile = Paths.get(dir + "/" + Globals.worldName + "/stats");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/stats");
+        inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/stats");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/stats");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        
+
         // make a copy of the advancements files
-        inFile = Paths.get(dir + "/" + Globals.worldName + "/advancements");
-        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.worldName + "/advancements");
+        inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/advancements");
+        outFile = Paths.get(dir + Globals.STATS_VIEWER_DIRECTORY + Globals.OPEN_WORLD_NAME + "/advancements");
         try {
             Lib.copyFolder(inFile, outFile);
         } catch (IOException e) {
@@ -113,7 +114,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         }
     }
 
-    void createPages() {
+    private void createPages() {
 
         // Set the choosing panel
         blankPanel = new BlankPanel(Globals.FONT_PRIMARY, file -> {
@@ -122,10 +123,10 @@ public class MainStatsViewer extends JPanel implements KeyListener {
             statsPanel.setFile(file);
             setPage(1);
         });
-        
+
         // Set the main panel
-        statsPanel = new MainPanel();        
-        
+        statsPanel = new MainPanel();
+
         addPage(blankPanel);
         addPage(statsPanel);
 
@@ -134,7 +135,7 @@ public class MainStatsViewer extends JPanel implements KeyListener {
 
     }
 
-    public MainStatsViewer() {
+    public StatsViewer() {
 
         this.setFocusable(true);
         this.setBackground(Color.WHITE);
@@ -155,14 +156,14 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         createPages();
     }
 
-    void addPage(JPanel page) {
+    private void addPage(JPanel page) {
         pages.add(page);
         page.setVisible(false);
         Lib.setFontRecursively(page, Globals.FONT_PRIMARY);
         this.add(page);
     }
 
-    void setPage(int idx) {
+    private void setPage(int idx) {
         for (int i = 0; i < pages.size(); i++) {
             if (i == idx)
                 pages.get(i).setVisible(true);
@@ -189,39 +190,24 @@ public class MainStatsViewer extends JPanel implements KeyListener {
         return new Dimension(Globals.PREF_W, Globals.PREF_H);
     }
 
-    public static void createAndShowGUI() {
+    private static void createAndShowGUI() {
         JFrame frame = new JFrame("Minecraft Statistics Viewer");
-        JPanel gamePanel = new MainStatsViewer();
+        JPanel gamePanel = new StatsViewer();
 
-        setApplicationIcon(frame);
+        // Load the icon image from a file or resource
+        String path = "icon.png";
+        ImageIcon icon = null;
+        URL imgURL = StatsViewer.class.getResource(path);
+        if (imgURL != null) {
+            icon = new ImageIcon(imgURL);
+            frame.setIconImage(icon.getImage());
+        }
 
         frame.getContentPane().add(gamePanel);
         frame.pack();
         frame.setLocationRelativeTo(null);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setVisible(true);
-    }
-
-    private static void setApplicationIcon(JFrame frame) {
-        // Load the icon image from a file or resource
-        ImageIcon icon = createImageIcon("icon.png");
-
-        // Set the icon for the JFrame
-        if (icon != null) {
-            System.out.println("Icon set");
-            frame.setIconImage(icon.getImage());
-        }
-    }
-
-    private static ImageIcon createImageIcon(String path) {
-        URL imageURL = MainStatsViewer.class.getResource(path);
-        if (imageURL != null) {
-            System.out.println(imageURL.toString());
-            return new ImageIcon(imageURL);
-        } else {
-            System.err.println("Resource not found: " + path);
-            return null;
-        }
     }
 
     public static void main(String[] args) {

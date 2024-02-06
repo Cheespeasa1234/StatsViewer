@@ -8,93 +8,163 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 
 public class Item {
-    
-    @Expose @SerializedName("Slot") public int slot;
-    @Expose public String id;
-    @Expose @SerializedName("Count") public int count;
-    @Expose @SerializedName("Damage") public int damage;
-    @Expose @SerializedName("RepairCost") public int repairCost;
-    @Expose @SerializedName("Items") public Item[] items;
-    @Expose @SerializedName("Enchantments") public Enchantment[] enchantments;
-    @Expose @SerializedName("Trim") public Trim trim;
-    @Expose public String name;
-    @Expose public Tag tag; // Add 'tag' field for nested structure
-    
+
+    @Expose
+    @SerializedName("Slot")
+    public int slot;
+    @Expose
+    public String id;
+    @Expose
+    @SerializedName("Count")
+    public int count;
+    @Expose
+    @SerializedName("Damage")
+    public int damage;
+    @Expose
+    @SerializedName("RepairCost")
+    public int repairCost;
+    @Expose
+    @SerializedName("Items")
+    public Item[] items;
+    @Expose
+    @SerializedName("Enchantments")
+    public Enchantment[] enchantments;
+    @Expose
+    @SerializedName("Trim")
+    public Trim trim;
+    @Expose
+    public String name;
+    @Expose
+    public Tag tag; // Add 'tag' field for nested structure
+
     public class Tag {
-        @Expose @SerializedName("RepairCost") public Integer repairCost;
-        @Expose @SerializedName("Damage") public Integer damage;
-        @Expose @SerializedName("Enchantments") public Enchantment[] enchantments;
-        @Expose @SerializedName("BlockEntityTag") public BlockEntityTag blockEntityTag;
-        
+        @Expose
+        @SerializedName("RepairCost")
+        public Integer repairCost;
+        @Expose
+        @SerializedName("Damage")
+        public Integer damage;
+        @Expose
+        @SerializedName("Enchantments")
+        public Enchantment[] enchantments;
+        @Expose
+        @SerializedName("BlockEntityTag")
+        public BlockEntityTag blockEntityTag;
+
         // naming
-        @Expose public Display display;
-        @Expose public String id;
-        
+        @Expose
+        public Display display;
+        @Expose
+        public String id;
+
         // trims
-        @Expose @SerializedName("Base") public Integer base;
-        @Expose public Pattern[] patterns;
-        
+        @Expose
+        @SerializedName("Base")
+        public Integer base;
+        @Expose
+        public Pattern[] patterns;
+
         // goat horns
-        @Expose public String instrument;
+        @Expose
+        public String instrument;
 
         // crossbows
-        
-        @Expose @SerializedName("ChargedProjectiles") public ChargedProjectile[] chargedProjectiles;
-        @Expose @SerializedName("Charged") public Integer charged;
-        
+        @Expose
+        @SerializedName("ChargedProjectiles")
+        public ChargedProjectile[] chargedProjectiles;
+        @Expose
+        @SerializedName("Charged")
+        public Integer charged;
+
         // firework rocket
-        @Expose @SerializedName("Fireworks") public Fireworks fireworks;
-        
+        @Expose
+        @SerializedName("Fireworks")
+        public Fireworks fireworks;
+
         // books
-        @Expose public String[] pages;
-        @Expose public String author;
-        @Expose public String title;
-        @Expose public Integer resolved;
+        @Expose
+        public String[] pages;
+        @Expose
+        public String author;
+        @Expose
+        public String title;
+        @Expose
+        public Integer resolved;
 
         public class Display {
-            @Expose @SerializedName("Name") public String name;
+            @Expose
+            @SerializedName("Name")
+            public String name;
         }
-        public class BlockEntityTag {
-            @Expose @SerializedName("Items") public Item[] items;
-            @Expose public String id;
-        }        
-        public class Pattern {
-            @Expose public String pattern;
-            @Expose public Integer color;
-        }
-        public class ChargedProjectile {
-            @Expose public String id;
-            @Expose @SerializedName("Count") public Integer count;
-        }
-        public class Fireworks {
-            @Expose public Explosion explosion;
-            @Expose @SerializedName("Flight") public Integer flight;
-    
-            public class Explosion {
-                
-                @Expose @SerializedName("Flicker") public Boolean flicker;
 
-                @Expose @SerializedName("Trail") public Boolean trail;
-                @Expose public Integer[] colors;
-                
-                @Expose @SerializedName("FadeColors") public Integer[] fadeColors;
-                @Expose public Type type;
-    
+        public class BlockEntityTag {
+            @Expose
+            @SerializedName("Items")
+            public Item[] items;
+            @Expose
+            public String id;
+        }
+
+        public class Pattern {
+            @Expose
+            public String pattern;
+            @Expose
+            public Integer color;
+        }
+
+        public class ChargedProjectile {
+            @Expose
+            public String id;
+            @Expose
+            @SerializedName("Count")
+            public Integer count;
+        }
+
+        public class Fireworks {
+            @Expose
+            public Explosion explosion;
+            @Expose
+            @SerializedName("Flight")
+            public Integer flight;
+
+            public class Explosion {
+
+                @Expose
+                @SerializedName("Flicker")
+                public Boolean flicker;
+
+                @Expose
+                @SerializedName("Trail")
+                public Boolean trail;
+                @Expose
+                public Integer[] colors;
+
+                @Expose
+                @SerializedName("FadeColors")
+                public Integer[] fadeColors;
+                @Expose
+                public Type type;
+
                 public class Type {
-                    @Expose public String name;
+                    @Expose
+                    public String name;
                 }
             }
         }
     }
 
     public class Enchantment {
-        @Expose public String id;
-        @Expose public Integer lvl;
+        @Expose
+        public String id;
+        @Expose
+        public Integer lvl;
     }
 
     public class Trim {
-        @Expose public String type;
-        @Expose public String material;
+        @Expose
+        public String type;
+        @Expose
+        public String material;
     }
 
     public class Inventories {
@@ -123,12 +193,12 @@ public class Item {
         String repairCost = "";
         String tag = (this.tag != null) ? toString(this.tag) : "";
         if (this.damage > 0) {
-            damage =" with " + damage + " damage";
+            damage = " with " + damage + " damage";
         }
         if (this.repairCost > 0) {
             repairCost = " with " + repairCost + " repair cost";
         }
-    
+
         String slot = "(slot " + this.slot + ")";
         if (this.slot == 103) {
             slot = "(helmet)";
