@@ -1,0 +1,51 @@
+name: Java Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v2
+
+    - name: Set up JDK
+      uses: actions/setup-java@v2
+      with:
+        java-version: '11' # You can specify the Java version here
+
+    - name: Build with Maven
+      run: mvn -B package --file pom.xml
+
+    - name: Check build status
+      if: always()
+      run: echo "::set-output name=build_status::${{ job.status }}"
+      
+  merge-check:
+    needs: build
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' && steps.build.outputs.build_status != 'failure'
+
+    steps:
+    - name: Check out code
+      uses: actions/checkout@v2
+      
+    - name: Set up Git
+      run: |
+        git config user.name "GitHub Actions"
+        git config user.email "<>"
+      
+    - name: Merge to main branch
+      run: |
+        git fetch origin
+        git merge --no-commit --no-ff ${{ github.event.pull_request.head.ref }}
+        git commit -am "Merged changes from pull request #${{ github.event.pull_request.number }}"
+        git push origin main
+      
