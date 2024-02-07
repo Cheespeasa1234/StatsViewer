@@ -12,7 +12,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
 
-public class BottomPanel extends JPanel {
+public class BottomPanelPlayers extends JPanel {
 
     public JPanel sideBar;
     public PlayerView playerView = new PlayerView();
@@ -26,7 +26,7 @@ public class BottomPanel extends JPanel {
         public void itemListInteracted(int selected);
     }
 
-    public BottomPanel() {
+    public BottomPanelPlayers() {
         players = new ArrayList<>();
         listModel = new DefaultListModel<>();
         itemList = new JList<>(listModel);

@@ -50,8 +50,11 @@ public class StatsViewer extends JPanel implements KeyListener {
     private void convertFiles(File dir) {
 
         // parse the level.dat
-        Path inFile = Paths.get(dir + Lib.getLocation() + "/level.dat");
+        Path inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/level.dat");
         Path outFile = Paths.get(dir + Lib.getLocation() + "/level.json");
+		System.out.println("Trying to convert level.dat to level.json");
+		System.out.println("inFile: " + inFile.toAbsolutePath().toString());
+		System.out.println("outFile: " + outFile.toAbsolutePath().toString());
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());

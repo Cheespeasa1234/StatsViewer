@@ -35,6 +35,34 @@ public class PlayerView extends JPanel {
         this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
     }
 
+    public JPanel createSummaryPanel(MinecraftPlayer player) {
+        ListPanel summaryPanel = new ListPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100, ListPanel.NO_OPTIONS, 0);
+        String name = "Name: " + player.name;
+        String uuid = "UUID: " + player.UUID;
+        String position = "Position: " + player.position[0] + ", " + player.position[1] + ", "
+                + player.position[2] + " in " + player.dimension;
+        String spawn = "Spawn: " + player.spawnX + ", " + player.spawnY + ", " + player.spawnZ;
+        
+        JLabel playerInfoTitle = new JLabel("Player Information");
+        playerInfoTitle.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
+        summaryPanel.addLabel(playerInfoTitle);
+        summaryPanel.addLabel(name);
+        summaryPanel.addLabel(uuid);
+        summaryPanel.addLabel(position);
+        summaryPanel.addLabel(spawn);
+        summaryPanel.addSpacer();
+
+        JLabel playerStatusTitle = new JLabel("Status Information");
+        playerStatusTitle.setFont(Globals.FONT_PRIMARY.deriveFont(24f));
+        summaryPanel.addLabel(playerStatusTitle);
+        summaryPanel.addLabel("Operator: " + player.op);
+        summaryPanel.addLabel("Whitelisted: " + player.whitelisted);
+        summaryPanel.addLabel("Banned: " + player.banned);
+        JPanel mainPanel = new JPanel();
+        mainPanel.add(summaryPanel);
+        return mainPanel;
+    }
+
     public JPanel createAdvancementsPanel(MinecraftPlayer player) {
         ListPanel panel = new ListPanel(
             WIDTH, Globals.BOTTOM_HEIGHT - 100,
@@ -121,6 +149,7 @@ public class PlayerView extends JPanel {
         statsGroups.removeAll();
 
         // make the inventory tab
+        statsGroups.addTab("Summary", createSummaryPanel(player));
         statsGroups.addTab("Inventory", createInventoryPanel(player));
         statsGroups.addTab("Advancements", createAdvancementsPanel(player));
 
