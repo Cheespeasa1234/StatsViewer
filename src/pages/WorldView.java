@@ -62,6 +62,12 @@ public class WorldView extends JPanel {
 		JLabel version = new JLabel("Version: " + world.version.name + " " + world.version.id);
 		summaryPanel.addLabel(version);
 
+		JLabel lastPlayed = new JLabel("Last Played: " + Lib.formatEpoch(world.lastPlayedEpoch));
+		summaryPanel.addLabel(lastPlayed);
+
+		JLabel seed = new JLabel("Seed: " + world.worldGenSettings.seed);
+		summaryPanel.addLabel(seed);
+
 		JPanel summaryContainer = new JPanel();
 		summaryContainer.add(summaryPanel);
 		tabs.addTab("Summary", summaryContainer);

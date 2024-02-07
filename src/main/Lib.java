@@ -17,8 +17,9 @@ import java.nio.file.StandardCopyOption;
 import java.nio.file.attribute.BasicFileAttributes;
 
 import java.text.DecimalFormat;
-
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.ChronoUnit;
 
@@ -43,6 +44,15 @@ import javax.swing.JComponent;
  * @author Nate Levison, February 2024
  */
 public class Lib {
+
+	public static String formatEpoch(long epochMs) {
+		Instant instant = Instant.ofEpochMilli(epochMs);
+        String dateString = DateTimeFormatter
+                                .ofPattern("yyyy-MM-dd HH:mm:ss")
+                                .withZone(ZoneId.systemDefault())
+                                .format(instant);
+		return dateString;
+	}
 
     public static String getLocation() {
         return Globals.STATS_VIEWER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME;

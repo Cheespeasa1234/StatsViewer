@@ -14,6 +14,17 @@ public class World {
 
 	@Expose @SerializedName("DayTime")
 	public int time;
+
+	@Expose @SerializedName("LastPlayed")
+	public int lastPlayedEpoch;
+
+	public class WorldGenSettings {
+		@Expose @SerializedName("seed")
+		public long seed;
+	}
+
+	@Expose @SerializedName("WorldGenSettings")
+	public WorldGenSettings worldGenSettings;
 	
 	public class Version {
 		@Expose @SerializedName("Snapshot")

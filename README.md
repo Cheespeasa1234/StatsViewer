@@ -42,9 +42,11 @@ Here is a brief overview of the packages and their contents:
 
 * `pages` - The AWT component package
     * `pages.BlankPanel.java` - First page that displays the open server and previous server buttons.
-    * `pages.BottomPanel.java` - The component of the second page that contains the actual interactive content.
+    * `pages.BottomPanelWorlds.java` - The component of the second page when in Worlds mode.
+    * `pages.BottomPanelPlayers.java` - The component of the second page when in Players mode.
     * `pages.MainPanel.java` - The container component which is the second page. It contains the top panel and the bottom panel and manages the layout.
     * `pages.PlayerView.java` - A wrapper component that displays all the information about a user. It includes the inventory, advancements, and statistics tabs, and the user's name and UUID.
+    * `pages.WorldView.java` - A wrapper component that displays all the information about a world. It includes the world's seed, name, and version, and the gamerules.
     * `pages.TopPanel.java` - The top bar on the main page that allows you to exit, and shows the loading speed.
 
 * `player` - The player data package
@@ -53,6 +55,7 @@ Here is a brief overview of the packages and their contents:
     * `player.Item.java` - The class that holds the info of an item, and provides methods for display and comparison.
     * `player.MinecraftPlayer.java` - The class that contains all info about a player, and is used by the PlayerView class to display the information. It is partially created with the deserializer, and partially created with some methods. It is the main class of the package.
     * `player.UsercachePlayer.java` - A class that holds the data for a usercache entry. Used by the deserializer. Only used to store UUID and name linking.
+    * `player.World.java` - A class that holds the data for a world. Used by the deserializer.
 
 * Other source files
     * `de-nbt.py` - Python script that uses nbtlib to turn NBT files into JSON files. Also roughly formats everything.
@@ -114,9 +117,15 @@ storePanel.addLabel(new JLabel("Orange")); // JLabel object
 storePanel.addPanel(new QuantityLabel(...)); // QuantityLabel object
 ```
 
-Even though the values in the quantity label are named `name`, `count`, and `slot`, they can easily be modified visually, and the `QuantityLabel` class can easily be expanded. If there are any issues with this, submit a PR or a bug report.
+Even though the values in the quantity label are named `name`, `count`, and `slot`, they can easily be modified visually, and the `QuantityLabel` class can easily be expanded. It is strongly recommended to wrap the ListPanel into a JPanel, because otherwise, the ListPanel will not display properly. This can easily be done by adding the ListPanel to a JPanel, and then adding the JPanel to the frame.
 
-### `MinecraftPlayer`
+```java
+JPanel panel = new JPanel();
+panel.add(namePanel);
+frame.add(panel);
+```
+
+### `MinecraftPlayer` class
 
 The `MinecraftPlayer` class is a class that manages the deserialization and storage of information related to a player. It stores data from the `playerdata`, `stats`, and `advancements` folder, as well as making basic calculations from data found in `level.dat` and `usercache.json`. In order to fully populate the player object, there are some steps to deserialization and parsing, shown below.
 
@@ -153,6 +162,26 @@ MinecraftPlayer player = gson
 
 As seen above, the Gson library does much of the heavy lifting of reading raw JSON files. However, by default, Gson does not handle NBT files, so the `de-nbt.py` script is used to convert the NBT files into JSON files. It can easily be accessed with `Lib.execute("python3", "de-nbt.py", "original.nbt", "new.json")`. The `MinecraftPlayer` class also has many methods to display the information in a human-readable format, and to compare the information with other players.
 
+### `World` class
+
+The `World` class is a class that manages the deserialization and storage of information related to a world. It stores data from the `level.dat` file, as well as making basic calculations from data found in the `world` folder. It is entirely deserialized with Gson, and is very simple to use. The only thing that needs to be done is to reformat the NBT files into JSON files, as per usual, and then make sure to use the `formatEpoch` method to convert the epoch time into a human-readable format.
+
+```java
+World world = gson.fromJson(Lib.fileToString(levelFile), World.class); // Create the world
+String formattedTime = Lib.formatEpoch(world.lastPlayed); // format the last played time
+```
+
+Lastly, the `PlayerView` and `WorldView` classes are simple wrapper classes that when used in conjunction with Java Swing, display a Player or World object, respectively. They include all useful information about the object, and are easily expandable. As they are wrapper classes, they can easily be used, as seen below.
+
+```java
+// For players
+PlayerView playerView = new PlayerView();
+playerView.setPlayer(player);
+
+// For worlds
+WorldView worldView = new WorldView();
+worldView.setWorld(world);
+```
 
 ## Acknowledgements
 
