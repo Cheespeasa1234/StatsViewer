@@ -42,29 +42,41 @@ public class WorldView extends JPanel {
         this.world = world;
         tabs.removeAll();
 
-		JPanel summaryPanel = new JPanel();
-		summaryPanel.setLayout(new BoxLayout(summaryPanel, BoxLayout.Y_AXIS));
-		summaryPanel.setPreferredSize(new Dimension(WIDTH, Globals.BOTTOM_HEIGHT - 100));
+		ListPanel summaryPanel = new ListPanel(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT - 100, ListPanel.NO_OPTIONS, 0);
 
 		JLabel worldName = new JLabel("World: " + world.name);
 		worldName.setFont(Globals.FONT_PRIMARY.deriveFont(20f));
-		summaryPanel.add(worldName);
+		summaryPanel.addLabel(worldName);
 
 		String[] difficulties = {"Peaceful", "Easy", "Normal", "Hard"};
 		JLabel difficulty = new JLabel("Difficulty: " + difficulties[world.difficulty]);
-		summaryPanel.add(difficulty);
+		summaryPanel.addLabel(difficulty);
 		
 		String[] gameTypes = {"Survival", "Creative", "Adventure", "Spectator"};
 		JLabel gameType = new JLabel("Gamemode: " + gameTypes[world.gameType]);
-		summaryPanel.add(gameType);
+		summaryPanel.addLabel(gameType);
 
 		JLabel time = new JLabel("Day: " + (world.time / 24000));
-		summaryPanel.add(time);
+		summaryPanel.addLabel(time);
 
 		JLabel version = new JLabel("Version: " + world.version.name + " " + world.version.id);
-		summaryPanel.add(version);
+		summaryPanel.addLabel(version);
 
-		tabs.addTab("Summary", summaryPanel);
+		JPanel summaryContainer = new JPanel();
+		summaryContainer.add(summaryPanel);
+		tabs.addTab("Summary", summaryContainer);
+
+		ListPanel gamerulesPanel = new ListPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100, ListPanel.ALL_AZ_OPTIONS, ListPanel.SORT_AZ);
+		// for every gamerule, add a label to the panel
+		for (Map.Entry<String, String> entry : world.gamerules.entrySet()) {
+			JLabel label = new JLabel(entry.getKey() + ": " + entry.getValue());
+			gamerulesPanel.addLabel(label);
+		}
+
+		JPanel gamerulesContainer = new JPanel();
+		gamerulesContainer.add(gamerulesPanel);
+
+		tabs.addTab("Gamerules", gamerulesContainer);
 
         status.setText("Current World: " + world);
         status.setVisible(true);

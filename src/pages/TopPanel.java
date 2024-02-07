@@ -42,7 +42,7 @@ public class TopPanel extends JPanel {
 			onView2.run();
 		});
 
-        this.add(statusLabel);
+        // this.add(statusLabel);
         this.add(loadButton);
         this.add(backButton);
 		this.add(view1Button);

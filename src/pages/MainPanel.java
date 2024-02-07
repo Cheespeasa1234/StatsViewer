@@ -110,10 +110,8 @@ public class MainPanel extends JPanel {
 			bottomPanelWorldsMode.listModel.addElement(world.name);
 		}
 
-		System.out.println(gson.toJson(worlds));
-
 		long dif = System.currentTimeMillis() - start;
-		topPanel.statusLabel.setText("Loaded in " + ((double) dif / 1000) + "s.");
+		System.out.println("Loaded in " + ((double) dif / 1000) + "s.");
 	}
 
 	public void loadPlayers() {
@@ -204,7 +202,6 @@ public class MainPanel extends JPanel {
 		}
 
 		long dif = System.currentTimeMillis() - start;
-		topPanel.statusLabel.setText("Loaded in " + ((double) dif / 1000) + "s.");
-
+		System.out.println("Loaded in " + ((double) dif / 1000) + "s.");
 	}
 }
