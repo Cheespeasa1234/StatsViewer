@@ -2,6 +2,22 @@
 Minecraft StatsViewer - or StatsViewer - is a (mostly) standalone Java program that reads minecraft server / world files and displays statistics and other information in a human-consumable format.
 StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interface that easily keeps track of the information it processes.
 
+## Contents
+1. [Feature List](#feature-list)
+2. [Dependencies](#dependencies)
+3. [Installation](#installation)
+4. [The Problem](#the-problem)
+5. [Audience](#audience)
+6. [Documentation](#documentation)
+   - [Source File Structure](#source-file-structure)
+   - [Library Resources](#library-resources)
+      - [`ListPanel` and `QuantityLabel`](#listpanel-and-quantitylabel)
+      - [`MinecraftPlayer` class](#minecraftplayer-class)
+      - [`World` class](#world-class)
+   - [Contribution](#contribution)
+      - [How to code in this project](#how-to-code-in-this-project)
+      - [Acknowledgements](#acknowledgements)
+
 ## Feature List
 * Previously opened server storage
 * User & UUID display
@@ -22,6 +38,12 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
     * has server.properties, and usercache.json in it
     * has a world folder, which has a level.dat folder
     * has write permissions so that a .statsviewer directory can be made
+
+# The Problem
+This program serves to solve a quite niche problem that I found in the way minecraft servers and minecraft worlds are stored. I was making a scoreboard on my server to keep track of how many sticks someone has crafted (something to do with fletchers, don't ask). The issue is, when creating the scoreboard, it doesn't automatically populate- instead, the admin needs to check his own stats, and check the stats files of all the users of the server. This is slow, annoying, and sometimes inconsistent. 
+
+## Audience
+This is a program that visualizes information that a server admin might want to see at a glance. It not only shows statistics, which was the original purpose, but it shows inventory / enderchest content, achievements, world information, and gamerules, all in a nicely organized cross-platform view. It is completely standalone, because programs that require installation and ingrain themselves into your system are my pet peeve. The only thing the program stores is decompressed .dat files in a new directory in your server files, which makes it easier to debug and to do any other work yourself.
 
 # Documentation
 
@@ -182,6 +204,34 @@ playerView.setPlayer(player);
 WorldView worldView = new WorldView();
 worldView.setWorld(world);
 ```
+
+# Contribution
+
+This project is fully open sourced, so just make a PR if you want to change something. The Issues tab is also great, so put any requests or bugs there. I plan on improving this program but I am at a bit of a dead end.
+
+## How to code in this project
+
+This section is about where a bug might be:
+- __Something with the display of a player__: `player.MinecraftPlayer`, `pages.PlayerView`
+- __Something with the display of a world__: `player.World`, `pages.WorldView`
+- __Something with files not being read__: `main.Globals`, `main.Lib`
+- __Something with the main UI components__: `main.ListPanel`, `main.QuantityLabel`, the `pages` module, `player.UsercachePlayer`
+
+Those are the most common bugs I found during developement, and what file(s) they tended to be caused by. 
+Now, here are the core design principles of this project. I try to follow these while coding, so if you contribute, you should as well:
+1. Keep things componentized
+   - Each file / function does ONLY what it is meant to do. This means no .draw, .update, or .doEverything
+   - The `MinecraftPlayer` class is just for storing players, the `World` class is just for storing worlds, etc
+2. Library functions stay isolated and somewhat pure
+   - The `Lib` class has no internal state
+   - Any library functions / helper functions in the project go there
+3. Use TABS / FOUR SPACES!
+   - I am in the process of auto-formatting the whole project so yeah
+   - Tabs > four spaces, I will die on this hill
+4. Make useful code
+   - Even if your code isn't exactly the best, it isn't perfect, thats fine
+   - Code is meant to run fast, and correctly. If your code does that, great
+   - __Coding is fun__. Don't ruin that for yourself.
 
 ## Acknowledgements
 
