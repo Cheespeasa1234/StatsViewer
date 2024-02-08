@@ -21,11 +21,11 @@ public class BlankPanel extends JPanel {
         public void onFileChosen(File file);
     }
 
-    public File serverDirectory = null;
-    public JLabel label;
-    public JButton locateButton;
-    public JButton prevButton;
-    public JPanel buttonGroup;
+    private File serverDirectory = null;
+    private JLabel label;
+    private JButton locateButton;
+    private JButton prevButton;
+    private JPanel buttonGroup;
 
     public FileChosenListener fileChosenListener;
 

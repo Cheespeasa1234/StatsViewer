@@ -15,13 +15,13 @@ import javax.swing.ListSelectionModel;
 
 public class BottomPanelWorlds extends JPanel {
 
-    public JPanel sideBar;
-	public WorldView worldView = new WorldView();
+    private JPanel sideBar;
+	private WorldView worldView = new WorldView();
 
     public ArrayList<World> worlds;
     public DefaultListModel<String> listModel;
     public JList<String> itemList;
-    public JScrollPane scrollPane;
+    private JScrollPane scrollPane;
 
     public interface ItemListInteractionEvent {
         public void itemListInteracted(int selected);

@@ -76,14 +76,14 @@ public class MainPanel extends JPanel {
 		topPanel.statusLabel.setText("Server @ " + server.getAbsolutePath() + "...");
 	}
 
-	public class PermsPlayer {
+	private class PermsPlayer {
 		@Expose public String uuid;
 		@Expose public String name;
 		@Expose public int level;
 		@Expose public boolean bypassesPlayerLimit;
 	}
 
-	public void loadWorlds() {
+	private void loadWorlds() {
 
 		long start = System.currentTimeMillis();
 		
@@ -114,7 +114,7 @@ public class MainPanel extends JPanel {
 		System.out.println("Loaded in " + ((double) dif / 1000) + "s.");
 	}
 
-	public void loadPlayers() {
+	private void loadPlayers() {
 
 		long start = System.currentTimeMillis();
 		

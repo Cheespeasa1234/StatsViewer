@@ -14,13 +14,13 @@ import javax.swing.ListSelectionModel;
 
 public class BottomPanelPlayers extends JPanel {
 
-    public JPanel sideBar;
-    public PlayerView playerView = new PlayerView();
+    private JPanel sideBar;
+    private PlayerView playerView = new PlayerView();
 
     public DefaultListModel<String> listModel;
     public JList<String> itemList;
     public ArrayList<MinecraftPlayer> players;
-    public JScrollPane scrollPane;
+    private JScrollPane scrollPane;
 
     public interface ItemListInteractionEvent {
         public void itemListInteracted(int selected);

@@ -12,8 +12,8 @@ import javax.swing.JLabel;
  * @author Nate Levison, February 2024
  */
 public class QuantityLabel extends JLabel {
-    public double count;
-    public int slot;
+    private double count;
+    private int slot;
     public QuantityLabel(String l, double c) {
         super(l);
         count = c;
