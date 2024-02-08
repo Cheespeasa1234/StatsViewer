@@ -40,7 +40,7 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
     * has write permissions so that a .statsviewer directory can be made
 
 # The Problem
-This program serves to solve a quite niche problem that I found in the way minecraft servers and minecraft worlds are stored. I was making a scoreboard on my server to keep track of how many sticks someone has crafted (something to do with fletchers, don't ask). The issue is, when creating the scoreboard, it doesn't automatically populate- instead, the admin needs to check his own stats, and check the stats files of all the users of the server. This is slow, annoying, and sometimes inconsistent. 
+This program serves to solve a quite niche problem that I found in the way minecraft servers and minecraft worlds are stored. I was making a scoreboard on my server to keep track of how many sticks someone has crafted (something to do with fletchers, don't ask). The issue is, when creating the scoreboard, it doesn't automatically populate- instead, the admin needs to check his own stats, and check the stats files of all the users of the server. This is slow, annoying, and sometimes inconsistent.
 
 ## Audience
 This is a program that visualizes information that a server admin might want to see at a glance. It not only shows statistics, which was the original purpose, but it shows inventory / enderchest content, achievements, world information, and gamerules, all in a nicely organized cross-platform view. It is completely standalone, because programs that require installation and ingrain themselves into your system are my pet peeve. The only thing the program stores is decompressed .dat files in a new directory in your server files, which makes it easier to debug and to do any other work yourself.
@@ -231,7 +231,14 @@ Now, here are the core design principles of this project. I try to follow these 
 4. Make useful code
    - Even if your code isn't exactly the best, it isn't perfect, thats fine
    - Code is meant to run fast, and correctly. If your code does that, great
-   - __Coding is fun__. Don't ruin that for yourself.
+   - __Coding is fun__. Don't ruin that for me ;)
+
+## Future Plans
+- A way to edit the world's gamerules
+- Some information from region and entity files (don't know what yet)
+- A way to edit the player's inventory and stats (worried, because it might delete the player's data so I need to be careful)
+- more interesting formatting for the `other` tab in stats (make cm -> km, etc)
+- performance improvements / logging
 
 ## Acknowledgements
 
