@@ -2,6 +2,22 @@
 Minecraft StatsViewer - or StatsViewer - is a (mostly) standalone Java program that reads minecraft server / world files and displays statistics and other information in a human-consumable format.
 StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interface that easily keeps track of the information it processes.
 
+## Contents
+1. [Feature List](#feature-list)
+2. [Dependencies](#dependencies)
+3. [Installation](#installation)
+4. [The Problem](#the-problem)
+5. [Audience](#audience)
+6. [Documentation](#documentation)
+   - [Source File Structure](#source-file-structure)
+   - [Library Resources](#library-resources)
+      - [`ListPanel` and `QuantityLabel`](#listpanel-and-quantitylabel)
+      - [`MinecraftPlayer` class](#minecraftplayer-class)
+      - [`World` class](#world-class)
+   - [Contribution](#contribution)
+      - [How to code in this project](#how-to-code-in-this-project)
+      - [Acknowledgements](#acknowledgements)
+
 ## Feature List
 * Previously opened server storage
 * User & UUID display
