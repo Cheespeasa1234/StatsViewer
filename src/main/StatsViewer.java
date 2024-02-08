@@ -64,9 +64,8 @@ public class StatsViewer extends JPanel implements KeyListener {
                 return;
             }
         }
-        Lib.execute(
-                Globals.PYTHON_INSTANCE,
-                "src/de-nbt.py",
+
+        Lib.convertNBT(
                 inFile.toAbsolutePath().toString(),
                 outFile.toAbsolutePath().toString());
 
@@ -103,9 +102,7 @@ public class StatsViewer extends JPanel implements KeyListener {
                     return;
                 }
             }
-            Lib.execute(
-                    Globals.PYTHON_INSTANCE,
-                    "src/de-nbt.py",
+            Lib.convertNBT(
                     inFilePath.toAbsolutePath().toString(),
                     outFilePath.toAbsolutePath().toString());
 
@@ -220,11 +217,6 @@ public class StatsViewer extends JPanel implements KeyListener {
     }
 
     public static void main(String[] args) {
-
-        DependencyChecker.checkDependencies();
-
-        System.out.println(Globals.PREF_W + " " + Globals.PREF_H);
-        System.out.println(Globals.TOP_HEIGHT + " " + Globals.BOTTOM_HEIGHT);
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();

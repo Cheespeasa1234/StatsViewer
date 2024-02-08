@@ -37,14 +37,6 @@ public class Globals {
     public static final Font FONT_PRIMARY = new Font("Helvetica", Font.PLAIN, 16);
     
     /**
-     * Name of the python instance, changed by the {@link DependencyChecker} class
-     * This is the name of the python instance that will be used to run the python scripts
-     * @see DependencyChecker
-     * @see DependencyChecker#checkDependencies()
-     */
-    public static String PYTHON_INSTANCE = "python";
-
-    /**
      * Name of the pip instance, changed by the {@link DependencyChecker} class
      * This is the name of the pip instance that will be used to install the required python packages
      * @see DependencyChecker

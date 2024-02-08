@@ -5,6 +5,8 @@ import java.awt.Container;
 import java.awt.Font;
 
 import java.io.BufferedReader;
+import java.io.FileInputStream;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
@@ -29,6 +31,13 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JComponent;
+
+import org.json.JSONArray;
+import org.json.JSONObject;
+
+import net.querz.nbt.io.NBTInputStream;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
 
 /**
  * This class contains various utility methods used throughout the program
@@ -130,12 +139,24 @@ public class Lib {
      * @return void
      */
     public static void convertNBT(String fileIn, String fileOut) {
-        Lib.execute(
-                Globals.PYTHON_INSTANCE,
-                "src/format-stat.py",
-                "-I",
-                fileIn,
-                fileOut);
+        try {
+            // Read the NBT data from the input file
+            NBTInputStream nbtInputStream = new NBTInputStream(new FileInputStream(fileIn));
+            NamedTag compoundTag = nbtInputStream.readTag(99);
+
+            // Convert NBT data to JSON
+            String json = compoundTag.toString();
+
+            // Write the JSON data to the output file
+            Files.write(Paths.get(fileOut), json.getBytes());
+
+            // Close input stream
+            nbtInputStream.close();
+        } catch (IOException e) {
+			// get the name of the error
+			String errorName = e.getClass().getSimpleName();
+			System.out.println(errorName + " converting " + fileIn + " to " + fileOut);
+        }
     }
 
     /**

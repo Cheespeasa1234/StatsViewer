@@ -36,39 +36,36 @@ public class WorldView extends JPanel {
         this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
     }
 
-    public void setWorld(World world) {
+	public JPanel createGenerationPanel(World world) {
+		return null;
+	}
 
-        // reset everything
-        this.world = world;
-        tabs.removeAll();
-
+	public JPanel createSummaryPanel(World world) {
 		ListPanel summaryPanel = new ListPanel(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT - 100, ListPanel.NO_OPTIONS, 0);
 
 		JLabel worldName = new JLabel("World: " + world.name);
 		worldName.setFont(Globals.FONT_PRIMARY.deriveFont(20f));
 		summaryPanel.addLabel(worldName);
-
+		
 		String[] difficulties = {"Peaceful", "Easy", "Normal", "Hard"};
 		JLabel difficulty = new JLabel("Difficulty: " + difficulties[world.difficulty]);
 		summaryPanel.addLabel(difficulty);
-		
 		String[] gameTypes = {"Survival", "Creative", "Adventure", "Spectator"};
 		JLabel gameType = new JLabel("Gamemode: " + gameTypes[world.gameType]);
 		summaryPanel.addLabel(gameType);
-
 		JLabel time = new JLabel("Day: " + (world.time / 24000));
 		summaryPanel.addLabel(time);
-
 		JLabel version = new JLabel("Version: " + world.version.name + " " + world.version.id);
 		summaryPanel.addLabel(version);
-
 		JLabel seed = new JLabel("Seed: " + world.worldGenSettings.seed);
 		summaryPanel.addLabel(seed);
-
 		JPanel summaryContainer = new JPanel();
 		summaryContainer.add(summaryPanel);
-		tabs.addTab("Summary", summaryContainer);
 
+		return summaryContainer;
+	}
+
+	public JPanel createGameRulesPanel(World world) {
 		ListPanel gamerulesPanel = new ListPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100, ListPanel.ALL_AZ_OPTIONS, ListPanel.SORT_AZ);
 		// for every gamerule, add a label to the panel
 		for (Map.Entry<String, String> entry : world.gamerules.entrySet()) {
@@ -78,8 +75,19 @@ public class WorldView extends JPanel {
 
 		JPanel gamerulesContainer = new JPanel();
 		gamerulesContainer.add(gamerulesPanel);
+		return gamerulesContainer;
+	}
 
-		tabs.addTab("Gamerules", gamerulesContainer);
+    public void setWorld(World world) {
+
+        // reset everything
+        this.world = world;
+        tabs.removeAll();
+
+		
+		tabs.addTab("Summary", createSummaryPanel(world));
+		tabs.addTab("Gamerules", createGameRulesPanel(world));
+		tabs.addTab("Generation", createGenerationPanel(world));
 
         status.setText("Current World: " + world);
         status.setVisible(true);
