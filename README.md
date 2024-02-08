@@ -6,17 +6,20 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
 1. [Feature List](#feature-list)
 2. [Dependencies](#dependencies)
 3. [Installation](#installation)
+3. [Quick Start](#quick-start)
 4. [The Problem](#the-problem)
 5. [Audience](#audience)
 6. [Documentation](#documentation)
-   - [Source File Structure](#source-file-structure)
-   - [Library Resources](#library-resources)
-      - [`ListPanel` and `QuantityLabel`](#listpanel-and-quantitylabel)
-      - [`MinecraftPlayer` class](#minecraftplayer-class)
-      - [`World` class](#world-class)
-   - [Contribution](#contribution)
-      - [How to code in this project](#how-to-code-in-this-project)
-      - [Acknowledgements](#acknowledgements)
+    - [Source File Structure](#source-file-structure)
+    - [Library Resources](#library-resources)
+        - [`ListPanel` and `QuantityLabel`](#listpanel-and-quantitylabel)
+        - [`MinecraftPlayer` class](#minecraftplayer-class)
+        - [`World` class](#world-class)
+    - [Contribution](#contribution)
+        - [How to code in this project](#how-to-code-in-this-project)
+        - [Future Plans](#future-plans)
+        - [Acknowledgements](#acknowledgements)
+
 
 ## Feature List
 * Previously opened server storage
@@ -28,8 +31,16 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
 
 ## Dependencies
 * Python 3.8+, in path using "python" or "python3"
+    * If you haven't installed, you can get it [here](https://www.python.org/downloads/)
+    * Make sure if you are on Windows, you have the "Add to PATH" option checked
+    * Use `python --version` or `python3 --version` to check if it is installed
 * The pip package "nbtlib"
+    * Use `pip install nbtlib` or `pip3 install nbtlib` to install it
+    * Use `pip show nbtlib` or `pip3 show nbtlib` to check if it is installed
 * A JDK / JRE able to run Java 17+ programs
+    * If you haven't installed, you can get it [here](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
+    * Make sure you have the `java` command in your path
+    * Use `java --version` to check if it is installed
 
 ## Installation
 * Install any dependencies and have them accessible in path
@@ -39,8 +50,19 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
     * has a world folder, which has a level.dat folder
     * has write permissions so that a .statsviewer directory can be made
 
+## Quick Start
+1. Download the jarfile from the releases page
+2. Run the jarfile
+3. Select the directory of a minecraft server
+4. Press "Confirm" to load in the data
+5. Select a user or world to view the information
+6. Press "Exit" to close the program
+7. In future runs, the server will be saved in the "Recent Servers" list
+
 # The Problem
 This program serves to solve a quite niche problem that I found in the way minecraft servers and minecraft worlds are stored. I was making a scoreboard on my server to keep track of how many sticks someone has crafted (something to do with fletchers, don't ask). The issue is, when creating the scoreboard, it doesn't automatically populate- instead, the admin needs to check his own stats, and check the stats files of all the users of the server. This is slow, annoying, and sometimes inconsistent.
+
+_TLDR_: I wanted to see the statistics of all the users of my server at a glance, and I didn't want to have to go through the stats files of all the users to do it. So I made this program.
 
 ## Audience
 This is a program that visualizes information that a server admin might want to see at a glance. It not only shows statistics, which was the original purpose, but it shows inventory / enderchest content, achievements, world information, and gamerules, all in a nicely organized cross-platform view. It is completely standalone, because programs that require installation and ingrain themselves into your system are my pet peeve. The only thing the program stores is decompressed .dat files in a new directory in your server files, which makes it easier to debug and to do any other work yourself.
@@ -54,7 +76,7 @@ Some information can not be fit into standard documentation format, so it is pro
 
 The StatsViewer program is organized into three packages with (mostly) separate purposes.
 Here is a brief overview of the packages and their contents:
-* `main` - The main package
+* `main` - The main package. Contains the main class, and the classes that manage the GUI and the program. Also includes library classes.
     * `main.DependencyChecker.java` - Static class that checks that python and nbtlib are available.
     * `main.Globals.java` - Static class that holds global variables and constants.
     * `main.Lib.java` - Static class that holds library functions and classes, and manages globals.
@@ -62,7 +84,7 @@ Here is a brief overview of the packages and their contents:
     * `main.QuantityLabel.java` - An extension of the JLabel class that makes it easier to display labels with built in data, solely compatible with ListPanel.
     * `main.StatsViewer.java` - The main class that runs the program and manages the GUI.
 
-* `pages` - The AWT component package
+* `pages` - The AWT component package. Each class is a component that is used in the main GUI.
     * `pages.BlankPanel.java` - First page that displays the open server and previous server buttons.
     * `pages.BottomPanelWorlds.java` - The component of the second page when in Worlds mode.
     * `pages.BottomPanelPlayers.java` - The component of the second page when in Players mode.
@@ -71,7 +93,7 @@ Here is a brief overview of the packages and their contents:
     * `pages.WorldView.java` - A wrapper component that displays all the information about a world. It includes the world's seed, name, and version, and the gamerules.
     * `pages.TopPanel.java` - The top bar on the main page that allows you to exit, and shows the loading speed.
 
-* `player` - The player data package
+* `player` - The player data package. Mostly static classes, but the Item class is not.
     * `player.Advancement.java` - A class that holds the data for an advancement. Used by the deserializer.
     * `player.Inventory.java` - A class that holds the data for an inventory. Used by the deserializer.
     * `player.Item.java` - The class that holds the info of an item, and provides methods for display and comparison.
@@ -86,7 +108,6 @@ Here is a brief overview of the packages and their contents:
     * `src/main/icon.png` - The icon of the program. Unused.
 
 ## Library Resources
-
 
 ### `ListPanel` and `QuantityLabel`
 
