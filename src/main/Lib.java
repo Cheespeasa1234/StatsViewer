@@ -252,6 +252,12 @@ public class Lib {
         clipboard.setContents(stringSelection, null);
     }
 
+	public static int getSecondsSince(String datetime) {
+		LocalDateTime inputDateTime = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+		LocalDateTime currentDateTime = LocalDateTime.now();
+		return (int) ChronoUnit.SECONDS.between(inputDateTime, currentDateTime);
+	}
+
     /**
      * Returns a human-readable string representing the time difference between the
      * input datetime and the current datetime

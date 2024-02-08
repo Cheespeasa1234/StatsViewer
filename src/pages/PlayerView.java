@@ -66,14 +66,14 @@ public class PlayerView extends JPanel {
     public JPanel createAdvancementsPanel(MinecraftPlayer player) {
         ListPanel panel = new ListPanel(
             WIDTH, Globals.BOTTOM_HEIGHT - 100,
-            ListPanel.ALL_AZ_OPTIONS, ListPanel.SORT_AZ
+            ListPanel.ALL_OPTIONS_EXCEPT_SLOT, ListPanel.SORT_AZ
         );
         String[] advancementNames = player.advancements.keySet().toArray(new String[0]);
         Arrays.sort(advancementNames);
         for (String advancement : advancementNames) {
             Advancement a = player.advancements.get(advancement);
             if (a.done) {
-                panel.addLabel(advancement + ": " + Lib.getTimeSince(a.getCompleted()), 0);
+                panel.addLabel(advancement + ": " + Lib.getTimeSince(a.getCompleted()), Lib.getSecondsSince(a.getCompleted()));
             }
         }
         JPanel mainPanel = new JPanel();
