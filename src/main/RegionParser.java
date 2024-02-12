@@ -19,25 +19,6 @@ public class RegionParser {
     private static final int SECTOR_SIZE = 4096;
     private static final int CHUNK_COUNT = 1024;
 
-    public static class Logger {
-        private long start;
-        private String task;
-        private String title;
-
-        public Logger(String title) {
-            this.title = title;
-        }
-
-        public void startTask(String task) {
-            this.task = task;
-            this.start = System.currentTimeMillis();
-        };
-
-        public void endTask() {
-            System.out.println("[" + title + "] " + task + " took " + (System.currentTimeMillis() - start) + "ms");
-        }
-    }
-
     public static class Chunk {
         public NamedTag nbt;
         public Locator locator;
@@ -48,8 +29,8 @@ public class RegionParser {
             this.locator = locator;            
         }
         
-        public void printNBT() {
-            System.out.println(this.nbt.getTag().toString(64));
+        public String toNBTString() {
+            return this.nbt.getTag().toString(64);
         }
     }
 
@@ -79,11 +60,11 @@ public class RegionParser {
         }
     }
 
-    private static Chunk[] chunks = new Chunk[CHUNK_COUNT];
-    private static Locator[] locators = new Locator[CHUNK_COUNT];
-    private static byte[] header = new byte[SECTOR_SIZE];
+    private Chunk[] chunks = new Chunk[CHUNK_COUNT];
+    private Locator[] locators = new Locator[CHUNK_COUNT];
+    private byte[] header = new byte[SECTOR_SIZE];
 
-    public static byte[] decompressZlib(byte[] compressedData) {
+    public byte[] decompressZlib(byte[] compressedData) {
         try {
             Inflater inflater = new Inflater();
             inflater.setInput(compressedData);
@@ -106,52 +87,9 @@ public class RegionParser {
         }
     }
 
-    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData) throws DataFormatException, IOException {
-        // Skip the first five bytes
-        byte[] compressedDataWithoutHeader = new byte[compressedData.length - 5];
-        for (int i = 0; i < compressedDataWithoutHeader.length; i++) {
-            compressedDataWithoutHeader[i] = compressedData[i + 5];
-        }
-
-        // Create a new Inflater to decompress the data
-        Inflater inflater = new Inflater();
-        inflater.setInput(compressedDataWithoutHeader);
-
-        // Create a ByteArrayOutputStream to hold the decompressed data
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedDataWithoutHeader.length);
-
-        // Create a byte array to hold the decompressed data temporarily
-        byte[] buffer = new byte[SECTOR_SIZE];
-        try {
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                if (count == 0 && inflater.needsInput()) {
-                    // Check if the inflater needs more input, indicating that the buffer might be incomplete
-                    throw new DataFormatException("Incomplete input data");
-                }
-                outputStream.write(buffer, 0, count);
-            }
-        } catch (DataFormatException e) {
-            // Handle the exception and print diagnostic information
-            System.err.println("Error decompressing data: " + e.getMessage());
-            System.err.println("Compressed data length: " + compressedData.length);
-            // Print the buffer contents
-            System.err.println("Buffer content: " + Arrays.toString(compressedData));
-            throw e; // Rethrow the exception
-        } finally {
-            // Close the streams and end the inflater
-            inflater.end();
-            outputStream.close();
-        }
-
-        // Return the decompressed data as a byte array
-        return outputStream;
-    }
-
-    public static void main(String[] args) throws IOException, Exception {
+    public void parse(String filePath, String dump_location) throws IOException, Exception {
 
         // Open the file
-        String filePath = "/Users/nlevison25/server/decoyworld/r.0.0.mca";
         FileInputStream fis = new FileInputStream(filePath);
 
         // Read the locators, skip timestamps
@@ -181,11 +119,10 @@ public class RegionParser {
             } else {
                 byte[] decompressed = decompressZlib(data);
                 chunks[chunkIdx] = new Chunk(decompressed, locators[chunkIdx]);
-                chunks[chunkIdx].printNBT();
+                // TODO: Dumping
             }
             fis.close();
         }
-
 
     }
 }
