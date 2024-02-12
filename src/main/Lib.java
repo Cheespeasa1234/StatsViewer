@@ -154,8 +154,8 @@ public class Lib {
             nbtInputStream.close();
         } catch (IOException e) {
 			// get the name of the error
-			String errorName = e.getClass().getSimpleName();
-			System.out.println(errorName + " converting " + fileIn + " to " + fileOut);
+			System.out.println("Error converting " + fileIn + " to " + fileOut);
+			e.printStackTrace();
         }
     }
 
