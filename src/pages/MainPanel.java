@@ -4,7 +4,7 @@ import main.Globals;
 import main.Lib;
 import player.MinecraftPlayer;
 import player.UsercachePlayer;
-import player.World;
+import world.World;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
