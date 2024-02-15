@@ -1,6 +1,17 @@
 package world;
 
 import java.awt.geom.Point2D;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
+
+import net.querz.nbt.io.NBTInputStream;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
 import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -26,63 +37,37 @@ public class RegionParser {
     private static final int SECTOR_SIZE = 4096;
     private static final int CHUNK_COUNT = 1024;
 
+    public static class Logger {
+        private long start;
+        private String task;
+        private String title;
+
+        public Logger(String title) {
+            this.title = title;
+        }
+
+        public void startTask(String task) {
+            this.task = task;
+            this.start = System.currentTimeMillis();
+        };
+
+        public void endTask() {
+            System.out.println("[" + title + "] " + task + " took " + (System.currentTimeMillis() - start) + "ms");
+        }
+    }
+
     public static class Chunk {
-        // data in nbt form
-        public CompoundTag nbt;
-        
+        public NamedTag nbt;
         public Locator locator;
-
-        public int chunkX, chunkZ;
-
 
         public Chunk(byte[] decompressedData, Locator locator) throws IOException {
             NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(decompressedData)).readTag(64);
-            this.nbt = (CompoundTag) nbtTag.getTag();
+            this.nbt = nbtTag;
             this.locator = locator;            
         }
         
-        public String toNBTString() {
-            return this.nbt.toString(64);
-        }
-
-        public void parseNBT() {
-            if (this.nbt == null) throw new NullPointerException("NBT data has not been parsed yet");
-            
-            // parse important info
-            this.chunkX = this.nbt.getInt("xPos");
-            this.chunkZ = this.nbt.getInt("zPos");
-        }
-
-        public String getBiome() {
-            
-            HashMap<String, Integer> biomeCounts = new HashMap<String, Integer>();
-
-            ListTag<?> sections = this.nbt.getListTag("sections");
-            for (Tag<?> section : sections) {
-                CompoundTag sec = (CompoundTag) section;
-                CompoundTag biomes = sec.getCompoundTag("biomes");
-                if (biomes == null) return "null";
-                ListTag<?> palette = biomes.getListTag("palette");
-                StringTag biome = (StringTag) palette.get(0);
-                String biomeName = biome.getValue();
-                if (biomeCounts.containsKey(biomeName)) {
-                    biomeCounts.put(biomeName, biomeCounts.get(biomeName) + 1);
-                } else {
-                    biomeCounts.put(biomeName, 1);
-                }
-            }
-
-            String mostCommonBiome = "";
-            int mostCommonCount = 0;
-            for (String biome : biomeCounts.keySet()) {
-                int count = biomeCounts.get(biome);
-                if (count > mostCommonCount) {
-                    mostCommonCount = count;
-                    mostCommonBiome = biome;
-                }
-            }
-
-            return mostCommonBiome;
+        public void printNBT() {
+            System.out.println(this.nbt.getTag().toString(64));
         }
     }
 
@@ -112,11 +97,11 @@ public class RegionParser {
         }
     }
 
-    private Chunk[] chunks = new Chunk[CHUNK_COUNT];
-    private Locator[] locators = new Locator[CHUNK_COUNT];
-    private byte[] header = new byte[SECTOR_SIZE];
+    private static Chunk[] chunks = new Chunk[CHUNK_COUNT];
+    private static Locator[] locators = new Locator[CHUNK_COUNT];
+    private static byte[] header = new byte[SECTOR_SIZE];
 
-    public byte[] decompressZlib(byte[] compressedData) {
+    public static byte[] decompressZlib(byte[] compressedData) {
         try {
             Inflater inflater = new Inflater();
             inflater.setInput(compressedData);
@@ -139,12 +124,52 @@ public class RegionParser {
         }
     }
 
-    public void parse(String filePath, String dumpLocation) throws IOException, Exception {
+    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData) throws DataFormatException, IOException {
+        // Skip the first five bytes
+        byte[] compressedDataWithoutHeader = new byte[compressedData.length - 5];
+        for (int i = 0; i < compressedDataWithoutHeader.length; i++) {
+            compressedDataWithoutHeader[i] = compressedData[i + 5];
+        }
 
-        System.out.println("Parsing " + filePath);
-        System.out.println();
+        // Create a new Inflater to decompress the data
+        Inflater inflater = new Inflater();
+        inflater.setInput(compressedDataWithoutHeader);
+
+        // Create a ByteArrayOutputStream to hold the decompressed data
+        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedDataWithoutHeader.length);
+
+        // Create a byte array to hold the decompressed data temporarily
+        byte[] buffer = new byte[SECTOR_SIZE];
+        try {
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                if (count == 0 && inflater.needsInput()) {
+                    // Check if the inflater needs more input, indicating that the buffer might be incomplete
+                    throw new DataFormatException("Incomplete input data");
+                }
+                outputStream.write(buffer, 0, count);
+            }
+        } catch (DataFormatException e) {
+            // Handle the exception and print diagnostic information
+            System.err.println("Error decompressing data: " + e.getMessage());
+            System.err.println("Compressed data length: " + compressedData.length);
+            // Print the buffer contents
+            System.err.println("Buffer content: " + Arrays.toString(compressedData));
+            throw e; // Rethrow the exception
+        } finally {
+            // Close the streams and end the inflater
+            inflater.end();
+            outputStream.close();
+        }
+
+        // Return the decompressed data as a byte array
+        return outputStream;
+    }
+
+    public static void main(String[] args) throws IOException, Exception {
 
         // Open the file
+        String filePath = "/Users/nlevison25/server/decoyworld/r.0.0.mca";
         FileInputStream fis = new FileInputStream(filePath);
 
         // Read the locators, skip timestamps
@@ -155,12 +180,7 @@ public class RegionParser {
             int locatorIdx = byteIdx / 4;
             locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2], header[byteIdx + 3]);
         }
-
-        double decompressTime = 0;
-        double parseTime = 0;
-        double validateTime = 0;
-        double writeTime = 0;
-
+      
         // Read the chunks
         for (int chunkIdx = 0; chunkIdx < CHUNK_COUNT; chunkIdx++) {
             fis = new FileInputStream(filePath);
@@ -177,62 +197,14 @@ public class RegionParser {
                 System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
                 System.exit(-1);
             } else {
-
-                // decompress the data
-                long start = System.currentTimeMillis();
                 byte[] decompressed = decompressZlib(data);
-                Chunk chunk = new Chunk(decompressed, locators[chunkIdx]);
-                chunks[chunkIdx] = chunk;
-                decompressTime += System.currentTimeMillis() - start;
-
-                // parse the NBT data
-                start = System.currentTimeMillis();
-                chunk.parseNBT();
-                parseTime += System.currentTimeMillis() - start;
-
-                // make sure the file and the folder exist
-                start = System.currentTimeMillis();
-                File folder = new File(dumpLocation);
-                File dump = new File(dumpLocation + "/chunk_" + chunk.chunkX + "_" + chunk.chunkZ + ".json");
-                folder.mkdirs();
-                dump.createNewFile();
-                validateTime += System.currentTimeMillis() - start;
-
-                // write to the file
-                // start = System.currentTimeMillis();
-                // BufferedWriter writer = new BufferedWriter(new java.io.FileWriter(dump));
-                // writer.write(chunk.toNBTString());
-                // writer.close();
-                // writeTime += System.currentTimeMillis() - start;
-
+                chunks[chunkIdx] = new Chunk(decompressed, locators[chunkIdx]);
+                chunks[chunkIdx].printNBT();
             }
-
             fis.close();
-
-            double progress = (double) chunkIdx / CHUNK_COUNT;
-            System.out.printf("\r%.2f%%", progress * 100);
-            System.out.flush();
         }
-        System.out.println("\nDone");
 
-        double averageDecompress = decompressTime / CHUNK_COUNT;
-        double averageParse = parseTime / CHUNK_COUNT;
-        double averageValidate = validateTime / CHUNK_COUNT;
-        double averageWrite = writeTime / CHUNK_COUNT;
-
-        System.out.println("Average decompress time: " + averageDecompress + "ms");
-        System.out.println("Average parse time: " + averageParse + "ms");
-        System.out.println("Average validate time: " + averageValidate + "ms");
-        System.out.println("Average write time: " + averageWrite + "ms");
 
     }
 
-    public static void main(String[] args) {
-        RegionParser parser = new RegionParser();
-        try {
-            parser.parse("D:\\decoy_server\\region\\r.0.0.mca", "D:\\decoy_server\\region_dump\\r.0.0\\");
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
 }
