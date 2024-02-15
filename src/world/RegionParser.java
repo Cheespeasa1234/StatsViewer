@@ -12,6 +12,24 @@ import java.util.zip.Inflater;
 import net.querz.nbt.io.NBTInputStream;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
+import java.io.BufferedWriter;
+import java.io.ByteArrayInputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.zip.DataFormatException;
+import java.util.zip.Inflater;
+
+import org.json.JSONObject;
+
+import net.querz.nbt.io.NBTInputStream;
+import net.querz.nbt.io.NamedTag;
+import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.ListTag;
+import net.querz.nbt.tag.StringTag;
 import net.querz.nbt.tag.Tag;
 
 public class RegionParser {
@@ -162,7 +180,7 @@ public class RegionParser {
             int locatorIdx = byteIdx / 4;
             locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2], header[byteIdx + 3]);
         }
-
+      
         // Read the chunks
         for (int chunkIdx = 0; chunkIdx < CHUNK_COUNT; chunkIdx++) {
             fis = new FileInputStream(filePath);
@@ -188,4 +206,5 @@ public class RegionParser {
 
 
     }
+
 }
