@@ -45,7 +45,6 @@ import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import main.Globals;
 import main.StatsViewer;
 import net.querz.nbt.io.NBTDeserializer;
 import net.querz.nbt.io.NBTInputStream;
@@ -61,7 +60,7 @@ import net.querz.nbt.tag.Tag;
  * and more
  * 
  * @see main.StatsViewer
- * @see main.Globals
+ * @see util.Globals
  * @see main.DependencyChecker
  * @see main.StatsViewer
  * @author Nate Levison, February 2024

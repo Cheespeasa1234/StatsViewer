@@ -1,6 +1,5 @@
 package pages;
 
-import main.Globals;
 import main.ListPanel;
 
 import java.awt.Dimension;
@@ -18,8 +17,9 @@ import javax.swing.JTabbedPane;
 import player.Advancement;
 import player.Item;
 import player.MinecraftPlayer;
-import player.World;
+import util.Globals;
 import util.Lib;
+import world.World;
 
 public class WorldView extends JPanel {
     JLabel status;

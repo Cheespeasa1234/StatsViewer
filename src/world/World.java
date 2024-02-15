@@ -1,4 +1,4 @@
-package player;
+package world;
 
 import java.util.Map;
 

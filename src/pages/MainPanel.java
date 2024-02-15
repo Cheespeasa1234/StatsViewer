@@ -1,10 +1,10 @@
 package pages;
 
-import main.Globals;
 import player.MinecraftPlayer;
 import player.UsercachePlayer;
-import player.World;
+import util.Globals;
 import util.Lib;
+import world.World;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;

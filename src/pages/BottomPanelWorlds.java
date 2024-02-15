@@ -1,8 +1,8 @@
 package pages;
 
-import main.Globals;
 import player.MinecraftPlayer;
-import player.World;
+import util.Globals;
+import world.World;
 
 import java.awt.Dimension;
 import java.util.ArrayList;

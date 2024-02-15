@@ -37,7 +37,8 @@ import net.querz.nbt.tag.StringTag;
 import net.querz.nbt.tag.Tag;
 
 public class DataParsing {
-    
+
+    // This took way too long to figure out, im gonna go jerk off now
     public static JsonElement collapse(JsonElement element) {
         if (element.isJsonPrimitive()) {
             return element;
@@ -75,6 +76,7 @@ public class DataParsing {
         }
         return element;
     }
+
     /**
      * Takes in a .dat file in NBT format, and converts it to a JSON file.
      * Uses the system's python instance to convert.
@@ -107,23 +109,12 @@ public class DataParsing {
             obj = collapse(obj);
             String json = gson.toJson(obj);
 
-            // // Create a Gson instance with the custom deserializer
-            // GsonBuilder builder = new GsonBuilder();
-            // builder.registerTypeAdapter(JsonObject.class, new CustomDeserializer());
-            // Gson gson = builder.setPrettyPrinting().create();
-
-            // // Use the new Gson instance to parse and collapse the JSON
-            // JsonObject jsonObject = gson.fromJson(json, JsonObject.class);
-            // json = gson.toJson(jsonObject);
-
             // Write the JSON data to the output file
             Files.write(Paths.get(fileOut), json.getBytes());
 
             // Close input stream
             nbtInputStream.close();
-        } catch (
-
-        IOException e) {
+        } catch (IOException e) {
             // Print error message and stack trace
             System.out.println("Error converting " + fileIn + " to " + fileOut);
             e.printStackTrace();

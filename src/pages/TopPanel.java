@@ -1,13 +1,13 @@
 package pages;
 
-import main.Globals;
-
 import java.awt.Color;
 import java.awt.Dimension;
 
 import javax.swing.JButton;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+
+import util.Globals;
 
 public class TopPanel extends JPanel {
 

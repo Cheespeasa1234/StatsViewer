@@ -20,8 +20,8 @@ import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
-import main.Globals;
 import util.DataParsing;
+import util.Globals;
 import util.Lib;
 
 /**

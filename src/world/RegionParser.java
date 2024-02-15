@@ -1,4 +1,4 @@
-package main;
+package world;
 
 import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;

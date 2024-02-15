@@ -11,7 +11,7 @@ import javax.swing.JLabel;
 import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
-import main.Globals;
+import util.Globals;
 import util.Lib;
 
 public class BlankPanel extends JPanel {
