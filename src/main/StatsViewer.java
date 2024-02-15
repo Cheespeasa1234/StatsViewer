@@ -22,6 +22,8 @@ import javax.swing.UnsupportedLookAndFeelException;
 
 import pages.BlankPanel;
 import pages.MainPanel;
+import util.DataParsing;
+import util.Lib;
 
 /**
  * The main class for the Minecraft Statistics Viewer
@@ -65,7 +67,7 @@ public class StatsViewer extends JPanel implements KeyListener {
             }
         }
 
-        Lib.convertNBT(
+        DataParsing.convertNBT(
                 inFile.toAbsolutePath().toString(),
                 outFile.toAbsolutePath().toString());
 
@@ -102,7 +104,7 @@ public class StatsViewer extends JPanel implements KeyListener {
                     return;
                 }
             }
-            Lib.convertNBT(
+            DataParsing.convertNBT(
                     inFilePath.toAbsolutePath().toString(),
                     outFilePath.toAbsolutePath().toString());
 

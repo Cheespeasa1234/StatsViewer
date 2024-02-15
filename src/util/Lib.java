@@ -1,13 +1,15 @@
-package main;
+package util;
 
 import java.awt.Component;
 import java.awt.Container;
 import java.awt.Font;
 
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.FileInputStream;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.nio.file.FileVisitResult;
@@ -29,15 +31,27 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.zip.GZIPInputStream;
+import java.util.zip.InflaterInputStream;
 
 import javax.swing.JComponent;
 
 import org.json.JSONArray;
 import org.json.JSONObject;
 
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonArray;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonObject;
+
+import main.Globals;
+import main.StatsViewer;
+import net.querz.nbt.io.NBTDeserializer;
 import net.querz.nbt.io.NBTInputStream;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
+import net.querz.nbt.tag.Tag;
 
 /**
  * This class contains various utility methods used throughout the program
@@ -54,14 +68,14 @@ import net.querz.nbt.tag.CompoundTag;
  */
 public class Lib {
 
-	public static String formatEpoch(long epochMs) {
-		Instant instant = Instant.ofEpochMilli(epochMs);
+    public static String formatEpoch(long epochMs) {
+        Instant instant = Instant.ofEpochMilli(epochMs);
         String dateString = DateTimeFormatter
-                                .ofPattern("yyyy-MM-dd HH:mm:ss")
-                                .withZone(ZoneId.systemDefault())
-                                .format(instant);
-		return dateString;
-	}
+                .ofPattern("yyyy-MM-dd HH:mm:ss")
+                .withZone(ZoneId.systemDefault())
+                .format(instant);
+        return dateString;
+    }
 
     public static String getLocation() {
         return Globals.STATS_VIEWER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME;
@@ -75,9 +89,9 @@ public class Lib {
      * If an element has no font, it gets the whole font.
      * 
      * @param container
-     *            The swing component to modify
+     * The swing component to modify
      * @param font
-     *            The font to enforce
+     * The font to enforce
      * @return void
      */
     public static void setFontRecursively(Container container, Font font) {
@@ -98,72 +112,10 @@ public class Lib {
     }
 
     /**
-     * Splits a string into tokens, based on how JSON is formatted.
-     * Splits by all commas, and colons only if the colon isn't in between quotes.
-     * Examples:
-     * 
-     * <pre>
-     * <br>splitPressedJSON("\"minecraft:cobblestone\":5") = ["\"minecraft: cobblestone\"", "5"]
-     * <br>splitPressedJSON("\"minecraft:cobblestone\":5,"\"minecraft:ender_pearl\":18923, hello") = ["\"minecraft: cobblestone\"", "5", "\"minecraft:ender_pearl\"", "18923", "hello"]
-     * <br>splitPressedJSON("\"minecraft:cobblestone\":5, hello") = ["\"minecraft: cobblestone\"", "5", "hello"]
-     * </pre>
-     */
-    public static List<String> splitPressedJSON(String input) {
-        List<String> result = new ArrayList<String>();
-
-        Pattern pattern = Pattern.compile("[^\\s\"']+|\"([^\"]*)\"|'([^']*)'");
-        Matcher matcher = pattern.matcher(input);
-
-        while (matcher.find()) {
-            String match = matcher.group();
-            if (!match.isEmpty()) {
-                // if the match has a comma, get rid of that
-                if (match.charAt(match.length() - 1) == ',')
-                    result.add(match.substring(0, match.length() - 1));
-                else
-                    result.add(match);
-            }
-        }
-
-        return result;
-    }
-
-    /**
-     * Takes in a .dat file in NBT format, and converts it to a JSON file.
-     * Uses the system's python instance to convert.
-     * 
-     * @param fileIn
-     *            The full path of the file to convert
-     * @param fileOut
-     *            The full path of the location to put the new file
-     * @return void
-     */
-    public static void convertNBT(String fileIn, String fileOut) {
-        try {
-            // Read the NBT data from the input file
-            NBTInputStream nbtInputStream = new NBTInputStream(new FileInputStream(fileIn));
-            NamedTag compoundTag = nbtInputStream.readTag(99);
-
-            // Convert NBT data to JSON
-            String json = compoundTag.toString();
-
-            // Write the JSON data to the output file
-            Files.write(Paths.get(fileOut), json.getBytes());
-
-            // Close input stream
-            nbtInputStream.close();
-        } catch (IOException e) {
-			// get the name of the error
-			System.out.println("Error converting " + fileIn + " to " + fileOut);
-			e.printStackTrace();
-        }
-    }
-
-    /**
      * Executes a given command in a new process, and prints the stdout and stderr
      * 
      * @param args
-     *            The command to execute
+     * The command to execute
      * @return void
      */
     public static void execute(String... args) {
@@ -199,7 +151,7 @@ public class Lib {
      * Reads the contents of a file into a string
      * 
      * @param filePath
-     *            The full path of the file to read
+     * The full path of the file to read
      * @return The contents of the file as a string
      */
     public static String fileToString(String filePath) {
@@ -222,7 +174,7 @@ public class Lib {
      * Used for the statistics tabs, to format very large numbers
      * 
      * @param d
-     *            The double to format
+     * The double to format
      * @return The formatted string
      */
     public static String doubleToString(double d) {
@@ -235,25 +187,23 @@ public class Lib {
      * Recursively copies all files and subdirectories
      * 
      * @param source
-     *            The full path of the source folder
+     * The full path of the source folder
      * @param target
-     *            The full path of the target folder
+     * The full path of the target folder
      * @return void
      * @throws IOException
-     *             If the source or target folder cannot be accessed
+     * If the source or target folder cannot be accessed
      */
     public static void copyFolder(Path source, Path target) throws IOException {
         // Copy the folder and its contents recursively
         Files.walkFileTree(source, new SimpleFileVisitor<Path>() {
-            @Override
-            public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
+            @Override public FileVisitResult preVisitDirectory(Path dir, BasicFileAttributes attrs) throws IOException {
                 Path targetDir = target.resolve(source.relativize(dir));
                 Files.createDirectories(targetDir);
                 return FileVisitResult.CONTINUE;
             }
 
-            @Override
-            public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
+            @Override public FileVisitResult visitFile(Path file, BasicFileAttributes attrs) throws IOException {
                 Files.copy(file, target.resolve(source.relativize(file)), StandardCopyOption.REPLACE_EXISTING);
                 return FileVisitResult.CONTINUE;
             }
@@ -264,7 +214,7 @@ public class Lib {
      * Copies the given text to the system clipboard
      * 
      * @param text
-     *            The text to copy
+     * The text to copy
      * @return void
      */
     public static void copyTextToClipboard(String text) {
@@ -273,11 +223,11 @@ public class Lib {
         clipboard.setContents(stringSelection, null);
     }
 
-	public static int getSecondsSince(String datetime) {
-		LocalDateTime inputDateTime = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
-		LocalDateTime currentDateTime = LocalDateTime.now();
-		return (int) ChronoUnit.SECONDS.between(inputDateTime, currentDateTime);
-	}
+    public static int getSecondsSince(String datetime) {
+        LocalDateTime inputDateTime = LocalDateTime.parse(datetime, DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"));
+        LocalDateTime currentDateTime = LocalDateTime.now();
+        return (int) ChronoUnit.SECONDS.between(inputDateTime, currentDateTime);
+    }
 
     /**
      * Returns a human-readable string representing the time difference between the
@@ -286,7 +236,7 @@ public class Lib {
      * HH:mm:ss -500"
      * 
      * @param datetime
-     *            The datetime to compare
+     * The datetime to compare
      * @return The time difference as a string
      */
     public static String getTimeSince(String datetime) {
@@ -324,7 +274,7 @@ public class Lib {
      * 
      * @see readRecentDirectories
      * @param directories
-     *            The list of directories to save
+     * The list of directories to save
      * @return void
      */
     public static void saveRecentDirectories(List<String> directories) {
@@ -365,7 +315,7 @@ public class Lib {
      * @see readRecentDirectories
      * @see saveRecentDirectories
      * @param dir
-     *            The directory to add
+     * The directory to add
      * @return void
      */
     public static void addRecent(String dir) {

@@ -1,10 +1,10 @@
 package pages;
 
 import main.Globals;
-import main.Lib;
 import player.MinecraftPlayer;
 import player.UsercachePlayer;
 import player.World;
+import util.Lib;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
@@ -165,7 +165,8 @@ public class MainPanel extends JPanel {
 				players.add(player);
 				bottomPanelPlayersMode.players.add(player);
 				bottomPanelPlayersMode.listModel.addElement(player.getName());
-			} catch (FileNotFoundException e) {
+			} catch (Exception e) {
+				System.out.println("Error reading player file: " + playerFile.getAbsolutePath());
 				e.printStackTrace();
 			}
 		}

@@ -21,7 +21,8 @@ import com.google.gson.annotations.SerializedName;
 import com.google.gson.reflect.TypeToken;
 
 import main.Globals;
-import main.Lib;
+import util.DataParsing;
+import util.Lib;
 
 /**
  * A class to represent a Minecraft player
@@ -107,7 +108,7 @@ public class MinecraftPlayer {
 		this.serverFile = serverFile;
 
 		// Format the statistics before proper parsing
-		Lib.convertNBT(
+		DataParsing.convertNBT(
 				statsFile.getAbsolutePath(),
 				statsFile.getAbsolutePath().replace(Globals.OPEN_WORLD_NAME,
 						".statsviewer/" + Globals.OPEN_WORLD_NAME));

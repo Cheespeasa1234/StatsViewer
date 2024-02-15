@@ -1,7 +1,6 @@
 package pages;
 
 import main.Globals;
-import main.Lib;
 import main.ListPanel;
 
 import java.awt.Dimension;
@@ -19,6 +18,7 @@ import javax.swing.JTabbedPane;
 import player.Advancement;
 import player.Item;
 import player.MinecraftPlayer;
+import util.Lib;
 
 /**
  * The WorldView class is used to display information about a specific world.
