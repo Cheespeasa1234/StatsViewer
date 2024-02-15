@@ -1,10 +1,15 @@
 package main;
 
-import javax.swing.*;
+import javax.swing.BoxLayout;
+import javax.swing.JComboBox;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
-import javax.swing.border.LineBorder;
 
-import java.awt.*;
+import java.awt.BorderLayout;
+
+import java.awt.Dimension;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -66,13 +71,17 @@ public class ListPanel extends JPanel {
 	 * All the sort options
 	 * Used to populate the JComboBox
 	 */
-	private static String[] allSortOptions = { "Slot First", "Slot Last", "Count Most", "Count Least", "A-Z", "Z-A" };
+	private static String[] allSortOptions = {
+			"Slot First", "Slot Last", "Count Most", "Count Least", "A-Z", "Z-A"
+	};
 
 	/**
 	 * A list of all the sort constants indexes
 	 */
-	private static int[] allSortConstants = { SORT_SLOT_MOST, SORT_SLOT_LEAST, SORT_COUNT_MOST, SORT_COUNT_LEAST,
-			SORT_AZ, SORT_ZA };
+	private static int[] allSortConstants = {
+			SORT_SLOT_MOST, SORT_SLOT_LEAST, SORT_COUNT_MOST, SORT_COUNT_LEAST,
+			SORT_AZ, SORT_ZA
+	};
 
 	/**
 	 * All the sort constants
@@ -89,7 +98,9 @@ public class ListPanel extends JPanel {
 	 * 
 	 * @see ListPanel#ListPanel(int, int, int[], int)
 	 */
-	public static final int[] ALL_OPTIONS_EXCEPT_SLOT = { SORT_COUNT_MOST, SORT_COUNT_LEAST, SORT_AZ, SORT_ZA };
+	public static final int[] ALL_OPTIONS_EXCEPT_SLOT = {
+			SORT_COUNT_MOST, SORT_COUNT_LEAST, SORT_AZ, SORT_ZA
+	};
 
 	/**
 	 * Only the alphabetical-related sorting options
@@ -97,7 +108,9 @@ public class ListPanel extends JPanel {
 	 * 
 	 * @see ListPanel#ListPanel(int, int, int[], int)
 	 */
-	public static final int[] ALL_AZ_OPTIONS = { SORT_AZ, SORT_ZA };
+	public static final int[] ALL_AZ_OPTIONS = {
+			SORT_AZ, SORT_ZA
+	};
 
 	/**
 	 * No sorting options
@@ -132,13 +145,13 @@ public class ListPanel extends JPanel {
 	 * The list of the enabled options is used to populate the JComboBox
 	 * 
 	 * @param width
-	 *            the width of the panel
+	 * the width of the panel
 	 * @param height
-	 *            the height of the panel
+	 * the height of the panel
 	 * @param enabledOptions
-	 *            the sorting options to enable, use the constants in this class
+	 * the sorting options to enable, use the constants in this class
 	 * @param defaultOption
-	 *            the default sorting option, use the constants in this class
+	 * the default sorting option, use the constants in this class
 	 * @see ListPanel#ALL_OPTIONS
 	 * @see ListPanel#ALL_OPTIONS_EXCEPT_SLOT
 	 * @see ListPanel#ALL_AZ_OPTIONS
@@ -201,9 +214,9 @@ public class ListPanel extends JPanel {
 	 * Create a new ListPanel with the given width and height
 	 * 
 	 * @param width
-	 *            the width of the panel
+	 * the width of the panel
 	 * @param height
-	 *            the height of the panel
+	 * the height of the panel
 	 */
 	public ListPanel(int width, int height) {
 		int[] enabledOptions = ALL_OPTIONS_EXCEPT_SLOT;
@@ -257,11 +270,11 @@ public class ListPanel extends JPanel {
 	 * Add a label to the list, sortable by count and slot
 	 * 
 	 * @param labelText
-	 *            the text of the label
+	 * the text of the label
 	 * @param count
-	 *            the count of the label
+	 * the count of the label
 	 * @param slot
-	 *            the slot of the label
+	 * the slot of the label
 	 * @see QuantityLabel
 	 */
 	public void addLabel(String labelText, double count, int slot) {
@@ -277,9 +290,9 @@ public class ListPanel extends JPanel {
 	 * Add a label to the list, sortable by count
 	 * 
 	 * @param labelText
-	 *            the text of the label
+	 * the text of the label
 	 * @param count
-	 *            the count of the label
+	 * the count of the label
 	 * @see QuantityLabel
 	 */
 	public void addLabel(String labelText, double count) {
@@ -295,7 +308,7 @@ public class ListPanel extends JPanel {
 	 * Add a label to the list, sortable by count
 	 * 
 	 * @param label
-	 *            the label to add
+	 * the label to add
 	 * @see QuantityLabel
 	 */
 	public void addLabel(QuantityLabel label) {
@@ -339,7 +352,7 @@ public class ListPanel extends JPanel {
 	 * Sort the labels by the given type
 	 * 
 	 * @param type
-	 *            the type of sorting to use, use the constants in this class
+	 * the type of sorting to use, use the constants in this class
 	 */
 	public void sortLabels(int type) {
 		if (type == SORT_SLOT_MOST) {

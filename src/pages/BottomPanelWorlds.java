@@ -1,6 +1,5 @@
 package pages;
 
-import player.MinecraftPlayer;
 import util.Globals;
 import world.World;
 
@@ -15,8 +14,8 @@ import javax.swing.ListSelectionModel;
 
 public class BottomPanelWorlds extends JPanel {
 
-    private JPanel sideBar;
-	private WorldView worldView = new WorldView();
+    // private JPanel sideBar;
+    private WorldView worldView = new WorldView();
 
     public ArrayList<World> worlds;
     public DefaultListModel<String> listModel;
@@ -43,9 +42,9 @@ public class BottomPanelWorlds extends JPanel {
         scrollPane = new JScrollPane(itemList);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setPreferredSize(new Dimension(175, Globals.BOTTOM_HEIGHT - 100));
-        
+
         this.add(scrollPane);
         this.add(worldView);
-        
+
     }
 }

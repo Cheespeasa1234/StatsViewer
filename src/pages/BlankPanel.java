@@ -16,8 +16,7 @@ import util.Lib;
 
 public class BlankPanel extends JPanel {
 
-    @FunctionalInterface
-    public interface FileChosenListener {
+    @FunctionalInterface public interface FileChosenListener {
         public void onFileChosen(File file);
     }
 

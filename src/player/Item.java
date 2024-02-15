@@ -141,7 +141,7 @@ public class Item {
 	 * Converts the provided object into a JSON string.
 	 * 
 	 * @param o
-	 *            The object to convert to a JSON string.
+	 * The object to convert to a JSON string.
 	 * @return JSON string representation of the object.
 	 */
 	private static String toString(Object o) {
@@ -216,7 +216,9 @@ public class Item {
 		boolean hasItems = this.tag != null && this.tag.blockEntityTag != null && this.tag.blockEntityTag.items != null;
 
 		if (!hasItems) {
-			return new String[] { line };
+			return new String[] {
+					line
+			};
 		}
 
 		String[] lines = new String[this.tag.blockEntityTag.items.length + 1];
@@ -232,10 +234,10 @@ public class Item {
 	 * and main inventory contents.
 	 * @deprecated
 	 * @param inventories
-	 *            The list of inventories containing ender chest and main inventory
-	 *            items.
+	 * The list of inventories containing ender chest and main inventory
+	 * items.
 	 */
-	private static void printInventoryContents(List<List<Item>> inventories) {
+	@SuppressWarnings("unused") private static void printInventoryContents(List<List<Item>> inventories) {
 		if (inventories != null && inventories.size() == 2) {
 			System.out.println("Ender Chest Contents:");
 			System.out.println(inventoryToString(inventories.get(0)));
@@ -251,7 +253,7 @@ public class Item {
 	 * Converts the provided inventory items into a formatted string representation.
 	 * @deprecated
 	 * @param inventory
-	 *            The list of items in the inventory.
+	 * The list of items in the inventory.
 	 * @return Formatted string representation of the inventory contents.
 	 */
 	private static String inventoryToString(List<Item> inventory) {

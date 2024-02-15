@@ -3,7 +3,6 @@ package util;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.lang.reflect.Type;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -13,27 +12,15 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
 
-import org.json.JSONObject;
-
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonArray;
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonDeserializer;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonNull;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParseException;
-import com.google.gson.JsonPrimitive;
-import com.google.gson.JsonSerializationContext;
-import com.google.gson.JsonSerializer;
-
 import net.querz.nbt.io.NBTInputStream;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.IntTag;
-import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.StringTag;
 import net.querz.nbt.tag.Tag;
 
 public class DataParsing {

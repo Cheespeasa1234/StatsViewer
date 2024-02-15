@@ -6,14 +6,12 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 import java.io.File;
 import java.io.IOException;
-import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
-import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -55,9 +53,9 @@ public class StatsViewer extends JPanel implements KeyListener {
         // parse the level.dat
         Path inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/level.dat");
         Path outFile = Paths.get(dir + Lib.getLocation() + "/level.json");
-		System.out.println("Trying to convert level.dat to level.json");
-		System.out.println("inFile: " + inFile.toAbsolutePath().toString());
-		System.out.println("outFile: " + outFile.toAbsolutePath().toString());
+        System.out.println("Trying to convert level.dat to level.json");
+        System.out.println("inFile: " + inFile.toAbsolutePath().toString());
+        System.out.println("outFile: " + outFile.toAbsolutePath().toString());
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile.getParent());
@@ -190,17 +188,11 @@ public class StatsViewer extends JPanel implements KeyListener {
         }
     }
 
-    @Override
-    public void keyPressed(KeyEvent e) {
-    }
+    @Override public void keyPressed(KeyEvent e) {}
 
-    @Override
-    public void keyReleased(KeyEvent e) {
-    }
+    @Override public void keyReleased(KeyEvent e) {}
 
-    @Override
-    public void keyTyped(KeyEvent e) {
-    }
+    @Override public void keyTyped(KeyEvent e) {}
 
     /* METHODS FOR CREATING JFRAME AND JPANEL */
 

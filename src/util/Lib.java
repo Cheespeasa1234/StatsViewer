@@ -5,11 +5,7 @@ import java.awt.Container;
 import java.awt.Font;
 
 import java.io.BufferedReader;
-import java.io.DataInputStream;
-import java.io.FileInputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.InputStreamReader;
 
 import java.nio.file.FileVisitResult;
@@ -29,28 +25,7 @@ import java.time.temporal.ChronoUnit;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.zip.GZIPInputStream;
-import java.util.zip.InflaterInputStream;
-
 import javax.swing.JComponent;
-
-import org.json.JSONArray;
-import org.json.JSONObject;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.JsonArray;
-import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
-
-import main.StatsViewer;
-import net.querz.nbt.io.NBTDeserializer;
-import net.querz.nbt.io.NBTInputStream;
-import net.querz.nbt.io.NamedTag;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.Tag;
 
 /**
  * This class contains various utility methods used throughout the program

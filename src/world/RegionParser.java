@@ -1,6 +1,5 @@
 package world;
 
-import java.awt.geom.Point2D;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
@@ -11,26 +10,6 @@ import java.util.zip.Inflater;
 
 import net.querz.nbt.io.NBTInputStream;
 import net.querz.nbt.io.NamedTag;
-import net.querz.nbt.tag.CompoundTag;
-import java.io.BufferedWriter;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
-
-import org.json.JSONObject;
-
-import net.querz.nbt.io.NBTInputStream;
-import net.querz.nbt.io.NamedTag;
-import net.querz.nbt.tag.CompoundTag;
-import net.querz.nbt.tag.ListTag;
-import net.querz.nbt.tag.StringTag;
-import net.querz.nbt.tag.Tag;
 
 public class RegionParser {
 
@@ -63,9 +42,9 @@ public class RegionParser {
         public Chunk(byte[] decompressedData, Locator locator) throws IOException {
             NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(decompressedData)).readTag(64);
             this.nbt = nbtTag;
-            this.locator = locator;            
+            this.locator = locator;
         }
-        
+
         public void printNBT() {
             System.out.println(this.nbt.getTag().toString(64));
         }
@@ -83,8 +62,8 @@ public class RegionParser {
 
         public int offsetBytes() {
             int result = (offx4 & 0xFF) << 16 |
-                        (offx2 & 0xFF) << 8  |
-                        (offx1 & 0xFF);
+                    (offx2 & 0xFF) << 8 |
+                    (offx1 & 0xFF);
             return result * SECTOR_SIZE;
         }
 
@@ -124,7 +103,8 @@ public class RegionParser {
         }
     }
 
-    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData) throws DataFormatException, IOException {
+    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData)
+            throws DataFormatException, IOException {
         // Skip the first five bytes
         byte[] compressedDataWithoutHeader = new byte[compressedData.length - 5];
         for (int i = 0; i < compressedDataWithoutHeader.length; i++) {
@@ -178,9 +158,10 @@ public class RegionParser {
         fis.close();
         for (int byteIdx = 0; byteIdx < header.length; byteIdx += 4) {
             int locatorIdx = byteIdx / 4;
-            locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2], header[byteIdx + 3]);
+            locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2],
+                    header[byteIdx + 3]);
         }
-      
+
         // Read the chunks
         for (int chunkIdx = 0; chunkIdx < CHUNK_COUNT; chunkIdx++) {
             fis = new FileInputStream(filePath);
@@ -203,7 +184,6 @@ public class RegionParser {
             }
             fis.close();
         }
-
 
     }
 

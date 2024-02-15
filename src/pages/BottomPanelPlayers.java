@@ -14,7 +14,7 @@ import javax.swing.ListSelectionModel;
 
 public class BottomPanelPlayers extends JPanel {
 
-    private JPanel sideBar;
+    // private JPanel sideBar;
     private PlayerView playerView = new PlayerView();
 
     public DefaultListModel<String> listModel;
@@ -43,9 +43,9 @@ public class BottomPanelPlayers extends JPanel {
         scrollPane = new JScrollPane(itemList);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setPreferredSize(new Dimension(175, Globals.BOTTOM_HEIGHT - 100));
-        
+
         this.add(scrollPane);
         this.add(playerView);
-        
+
     }
 }

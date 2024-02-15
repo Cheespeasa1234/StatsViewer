@@ -49,7 +49,7 @@ public class MainPanel extends JPanel {
 		}, () -> {
 			bottomPanelPlayersMode.setVisible(false);
 			bottomPanelWorldsMode.setVisible(true);
-		
+
 		});
 	}
 
@@ -86,7 +86,7 @@ public class MainPanel extends JPanel {
 	private void loadWorlds() {
 
 		long start = System.currentTimeMillis();
-		
+
 		// find every folder that has a level.dat file
 		File[] worldFolders = server.listFiles((dir, name) -> {
 			return new File(dir.getAbsolutePath() + "/" + name + "/level.dat").exists();
@@ -117,7 +117,7 @@ public class MainPanel extends JPanel {
 	private void loadPlayers() {
 
 		long start = System.currentTimeMillis();
-		
+
 		File playerDataDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/playerdata");
 		File playerStatsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/stats");
 		File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/advancements");

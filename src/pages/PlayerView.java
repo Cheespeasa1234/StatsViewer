@@ -54,7 +54,7 @@ public class PlayerView extends JPanel {
 	 * Creates a summary panel displaying basic information about the player.
 	 *
 	 * @param player
-	 *            The Minecraft player whose information needs to be displayed.
+	 * The Minecraft player whose information needs to be displayed.
 	 * @return JPanel containing player summary information.
 	 */
 	private JPanel createSummaryPanel(MinecraftPlayer player) {
@@ -89,7 +89,7 @@ public class PlayerView extends JPanel {
 	 * Creates a panel displaying advancements achieved by the player.
 	 *
 	 * @param player
-	 *            The Minecraft player whose advancements need to be displayed.
+	 * The Minecraft player whose advancements need to be displayed.
 	 * @return JPanel containing player advancements information.
 	 */
 	private JPanel createAdvancementsPanel(MinecraftPlayer player) {
@@ -114,7 +114,7 @@ public class PlayerView extends JPanel {
 	 * Creates a panel displaying the inventory of the player.
 	 *
 	 * @param player
-	 *            The Minecraft player whose inventory needs to be displayed.
+	 * The Minecraft player whose inventory needs to be displayed.
 	 * @return JPanel containing player inventory information.
 	 */
 	private JPanel createInventoryPanel(MinecraftPlayer player) {
@@ -161,7 +161,7 @@ public class PlayerView extends JPanel {
 	 * Creates a tab displaying statistics of a specific type for the player.
 	 *
 	 * @param tabName
-	 *            The name of the statistics tab.
+	 * The name of the statistics tab.
 	 * @return JPanel containing statistics information.
 	 */
 	private JPanel createStatsTab(String tabName) {
@@ -190,7 +190,7 @@ public class PlayerView extends JPanel {
 	 * This method updates the view with the player's details.
 	 *
 	 * @param player
-	 *            The Minecraft player to be displayed.
+	 * The Minecraft player to be displayed.
 	 */
 	public void setPlayer(MinecraftPlayer player) {
 
