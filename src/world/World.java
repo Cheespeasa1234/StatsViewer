@@ -17,35 +17,61 @@ import com.google.gson.annotations.SerializedName;
 import main.DialogManager;
 
 public class World {
-	@Expose @SerializedName("Difficulty") public int difficulty;
+	@Expose
+	@SerializedName("Difficulty")
+	public int difficulty;
 
-	@Expose @SerializedName("GameType") public int gameType;
+	@Expose
+	@SerializedName("GameType")
+	public int gameType;
 
-	@Expose @SerializedName("DayTime") public int time;
+	@Expose
+	@SerializedName("DayTime")
+	public int time;
 
-	@Expose @SerializedName("LastPlayed") public int lastPlayedEpoch;
+	@Expose
+	@SerializedName("LastPlayed")
+	public int lastPlayedEpoch;
 
 	public class WorldGenSettings {
-		@Expose @SerializedName("seed") public long seed;
+		@Expose
+		@SerializedName("seed")
+		public long seed;
 	}
 
-	@Expose @SerializedName("WorldGenSettings") public WorldGenSettings worldGenSettings;
+	@Expose
+	@SerializedName("WorldGenSettings")
+	public WorldGenSettings worldGenSettings;
 
 	public class Version {
-		@Expose @SerializedName("Snapshot") public int snapshot;
+		@Expose
+		@SerializedName("Snapshot")
+		public int snapshot;
 
-		@Expose @SerializedName("Series") public String series;
+		@Expose
+		@SerializedName("Series")
+		public String series;
 
-		@Expose @SerializedName("Id") public String id;
+		@Expose
+		@SerializedName("Id")
+		public String id;
 
-		@Expose @SerializedName("Name") public String name;
+		@Expose
+		@SerializedName("Name")
+		public String name;
 	}
 
-	@Expose @SerializedName("Version") public Version version;
+	@Expose
+	@SerializedName("Version")
+	public Version version;
 
-	@Expose @SerializedName("GameRules") public Map<String, String> gamerules;
+	@Expose
+	@SerializedName("GameRules")
+	public Map<String, String> gamerules;
 
-	@Expose @SerializedName("LevelName") public String name;
+	@Expose
+	@SerializedName("LevelName")
+	public String name;
 
 	public File[] regionFiles;
 	public RegionParser[] regions;
@@ -67,6 +93,27 @@ public class World {
 
 	private void setRegionFile(File[] regionFiles, int i) throws IOException, Exception {
 		this.regions[i] = new RegionParser();
-		regions[i].parse(regionFiles[i]);
+
+		// start the parsing
+		regions[i].startParse(regionFiles[i]);
+
+		// consume the chunks
+		new Thread(() -> {
+			while (!regions[i].isFinished()) {
+				
+				try {
+					regions[i].consumeChunk();
+					
+					// update the progress meter
+					SwingUtilities.invokeLater(() -> {
+						DialogManager.setCount(regions[i].getChunkConsumed());
+					});
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
+			DialogManager.close();
+		}).start();
+
 	}
 }

@@ -12,13 +12,18 @@ import javax.swing.JDialog;
 import javax.swing.JProgressBar;
 import javax.swing.SwingUtilities;
 
+import main.DialogManager;
 import util.DataParsing;
 
 public class RegionParser {
-
+    
     private static final int SECTOR_SIZE = 4096;
     private static final int CHUNK_COUNT = 1024;
 
+    public Chunk[] chunks = new Chunk[CHUNK_COUNT];
+    public Locator[] locators = new Locator[CHUNK_COUNT];
+    public byte[] header = new byte[SECTOR_SIZE];
+    
     public static class Locator {
         public byte offx4, offx2, offx1, sectorCount;
 
@@ -40,64 +45,43 @@ public class RegionParser {
             return sectorCount * SECTOR_SIZE;
         }
 
-        @Override public String toString() {
+        @Override
+        public String toString() {
             return String.format("ChunkLocator[0x%02X 0x%02X 0x%02X 0x%02X]", offx4, offx2, offx1, sectorCount);
         }
     }
 
-    public Chunk[] chunks = new Chunk[CHUNK_COUNT];
-    public Locator[] locators = new Locator[CHUNK_COUNT];
-    public byte[] header = new byte[SECTOR_SIZE];
+    private int chunkConsumed = 0;
+    private File fileConsumed = null;
 
-    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData)
-            throws DataFormatException, IOException {
-        // Skip the first five bytes
-        byte[] compressedDataWithoutHeader = new byte[compressedData.length - 5];
-        for (int i = 0; i < compressedDataWithoutHeader.length; i++) {
-            compressedDataWithoutHeader[i] = compressedData[i + 5];
+    public int getChunkConsumed() { return chunkConsumed; }
+    public boolean isFinished() { return chunkConsumed == CHUNK_COUNT - 1; }
+    public void consumeChunk() throws IOException {
+        chunkConsumed++;
+        FileInputStream fis = new FileInputStream(fileConsumed.getAbsolutePath());
+        fis.skip(locators[chunkConsumed].offsetBytes());
+
+        byte[] metadata = new byte[5];
+        fis.read(metadata);
+
+        byte[] data = new byte[locators[chunkConsumed].sizeBytes()];
+        fis.read(data);
+
+        byte compression = metadata[4];
+        if (compression != 0x02) {
+            System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
+            System.exit(-1);
+        } else {
+            byte[] decompressed = DataParsing.decompressZlib(data);
+            chunks[chunkConsumed] = new Chunk(decompressed, locators[chunkConsumed]);
         }
-
-        // Create a new Inflater to decompress the data
-        Inflater inflater = new Inflater();
-        inflater.setInput(compressedDataWithoutHeader);
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedDataWithoutHeader.length);
-
-        byte[] buffer = new byte[SECTOR_SIZE];
-        try {
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                if (count == 0 && inflater.needsInput()) {
-                    throw new DataFormatException("Incomplete input data");
-                }
-                outputStream.write(buffer, 0, count);
-            }
-        } catch (DataFormatException e) {
-            System.err.println("Error decompressing data: " + e.getMessage());
-            System.err.println("Compressed data length: " + compressedData.length);
-            System.err.println("Buffer content: " + Arrays.toString(compressedData));
-            throw e; // Rethrow the exception
-        } finally {
-            inflater.end();
-            outputStream.close();
-        }
-
-        return outputStream;
+        fis.close();
     }
-
-    public void parse(File file) throws IOException, Exception {
-
+    public void startParse(File file) throws IOException, Exception {
         // Open the file
+        fileConsumed = file;
         FileInputStream fis = new FileInputStream(file.getAbsolutePath());
-
-        JDialog dialog = new JDialog();
-        dialog.setSize(200, 100);
-        dialog.setLocationRelativeTo(null);
-        dialog.setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
-        
-        JProgressBar progressBar = new JProgressBar(0, 2048);
-        progressBar.setIndeterminate(true);
-        dialog.add(progressBar);
-        dialog.setVisible(true);
+        DialogManager.show(1024);
 
         // Read the locators, skip timestamps
         fis.read(header);
@@ -107,38 +91,7 @@ public class RegionParser {
             int locatorIdx = byteIdx / 4;
             locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2],
                     header[byteIdx + 3]);
-            progressBar.setValue(locatorIdx);
-            System.out.println("Locator " + locatorIdx + ": " + locators[locatorIdx]);
         }
-
-        // Read the chunks
-        for (int chunkIdx = 0; chunkIdx < CHUNK_COUNT; chunkIdx++) {
-            fis = new FileInputStream(file.getAbsolutePath());
-            fis.skip(locators[chunkIdx].offsetBytes());
-
-            byte[] metadata = new byte[5];
-            fis.read(metadata);
-
-            byte[] data = new byte[locators[chunkIdx].sizeBytes()];
-            fis.read(data);
-
-            byte compression = metadata[4];
-            if (compression != 0x02) {
-                System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
-                System.exit(-1);
-            } else {
-                byte[] decompressed = DataParsing.decompressZlib(data);
-                chunks[chunkIdx] = new Chunk(decompressed, locators[chunkIdx]);
-            }
-            fis.close();
-
-            final int x = chunkIdx + 1024;
-            progressBar.setValue(x);
-            System.out.println("Chunk " + chunkIdx + ": " + chunks[chunkIdx]);
-        }
-
-        dialog.dispose();
-
     }
 
 }
