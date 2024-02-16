@@ -1,4 +1,4 @@
-package pages;
+package components;
 
 import java.awt.Color;
 import java.awt.Dimension;
@@ -15,8 +15,11 @@ public class TopPanel extends JPanel {
         public void run();
     }
 
-    JLabel statusLabel;
-    JButton loadButton, backButton, view1Button, view2Button;
+    public JLabel statusLabel;
+    public JButton loadButton;
+    JButton backButton;
+    JButton view1Button;
+    JButton view2Button;
 
     public TopPanel(int topHeight, Event onLoad, Event onExit, Event onView1, Event onView2) {
 

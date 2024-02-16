@@ -1,5 +1,6 @@
 package util;
 
+import java.io.ByteArrayOutputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -11,6 +12,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.zip.GZIPInputStream;
+import java.util.zip.Inflater;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -175,6 +177,29 @@ public class DataParsing {
         }
 
         return result;
+    }
+
+    public static byte[] decompressZlib(byte[] compressedData) {
+        try {
+            Inflater inflater = new Inflater();
+            inflater.setInput(compressedData);
+
+            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedData.length);
+
+            byte[] buffer = new byte[1024];
+            while (!inflater.finished()) {
+                int count = inflater.inflate(buffer);
+                outputStream.write(buffer, 0, count);
+            }
+
+            outputStream.close();
+            inflater.end();
+
+            return outputStream.toByteArray();
+        } catch (Exception e) {
+            e.printStackTrace();
+            return null;
+        }
     }
 
 }

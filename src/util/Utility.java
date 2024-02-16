@@ -40,7 +40,7 @@ import javax.swing.JComponent;
  * @see main.StatsViewer
  * @author Nate Levison, February 2024
  */
-public class Lib {
+public class Utility {
 
     public static String formatEpoch(long epochMs) {
         Instant instant = Instant.ofEpochMilli(epochMs);
@@ -51,7 +51,7 @@ public class Lib {
         return dateString;
     }
 
-    public static String getLocation() {
+    public static String getSpecialLocation() {
         return Globals.STATS_VIEWER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME;
     }
 
@@ -253,7 +253,7 @@ public class Lib {
      */
     public static void saveRecentDirectories(List<String> directories) {
         try {
-            Path filePath = Paths.get(Globals.RECENTS_FILE_PATH);
+            Path filePath = Paths.get(Globals.RECENTS_FILE_DIRECTORY);
             Files.write(filePath, directories);
         } catch (IOException e) {
             e.printStackTrace();
@@ -271,7 +271,7 @@ public class Lib {
     public static List<String> readRecentDirectories() {
         List<String> directories = new ArrayList<>();
         try {
-            Path filePath = Paths.get(Globals.RECENTS_FILE_PATH);
+            Path filePath = Paths.get(Globals.RECENTS_FILE_DIRECTORY);
             if (Files.exists(filePath)) {
                 directories = Files.readAllLines(filePath);
             }

@@ -18,11 +18,9 @@ import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
-import pages.BlankPanel;
-import pages.MainPanel;
 import util.DataParsing;
 import util.Globals;
-import util.Lib;
+import util.Utility;
 
 /**
  * The main class for the Minecraft Statistics Viewer
@@ -34,7 +32,7 @@ import util.Lib;
  * @see BlankPanel
  * @see MainPanel
  * @see Globals
- * @see Lib
+ * @see Utility
  * @version 1.0
  * @since 1.0
  * @author Nate Levison, February 2024
@@ -52,7 +50,7 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // parse the level.dat
         Path inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/level.dat");
-        Path outFile = Paths.get(dir + Lib.getLocation() + "/level.json");
+        Path outFile = Paths.get(dir + Utility.getSpecialLocation() + "/level.json");
         System.out.println("Trying to convert level.dat to level.json");
         System.out.println("inFile: " + inFile.toAbsolutePath().toString());
         System.out.println("outFile: " + outFile.toAbsolutePath().toString());
@@ -72,7 +70,7 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // parse the playerdata folder
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/playerdata");
-        outFile = Paths.get(dir + Lib.getLocation() + "/playerdata");
+        outFile = Paths.get(dir + Utility.getSpecialLocation() + "/playerdata");
         if (!Files.exists(outFile)) {
             try {
                 Files.createDirectories(outFile);
@@ -113,18 +111,18 @@ public class StatsViewer extends JPanel implements KeyListener {
 
         // make a copy of the stats files
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/stats");
-        outFile = Paths.get(dir + Lib.getLocation() + "/stats");
+        outFile = Paths.get(dir + Utility.getSpecialLocation() + "/stats");
         try {
-            Lib.copyFolder(inFile, outFile);
+            Utility.copyFolder(inFile, outFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
 
         // make a copy of the advancements files
         inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/advancements");
-        outFile = Paths.get(dir + Lib.getLocation() + "/advancements");
+        outFile = Paths.get(dir + Utility.getSpecialLocation() + "/advancements");
         try {
-            Lib.copyFolder(inFile, outFile);
+            Utility.copyFolder(inFile, outFile);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -146,7 +144,7 @@ public class StatsViewer extends JPanel implements KeyListener {
         addPage(blankPanel);
         addPage(statsPanel);
 
-        Lib.setFontRecursively(this, Globals.FONT_PRIMARY);
+        Utility.setFontRecursively(this, Globals.FONT_PRIMARY);
         setPage(0);
 
     }
@@ -175,7 +173,7 @@ public class StatsViewer extends JPanel implements KeyListener {
     private void addPage(JPanel page) {
         pages.add(page);
         page.setVisible(false);
-        Lib.setFontRecursively(page, Globals.FONT_PRIMARY);
+        Utility.setFontRecursively(page, Globals.FONT_PRIMARY);
         this.add(page);
     }
 

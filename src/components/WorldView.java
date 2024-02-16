@@ -1,8 +1,7 @@
-package pages;
-
-import main.ListPanel;
+package components;
 
 import java.awt.Dimension;
+import java.io.IOException;
 import java.util.Map;
 
 import javax.swing.JLabel;
@@ -28,7 +27,12 @@ public class WorldView extends JPanel {
 	}
 
 	public JPanel createGenerationPanel(World world) {
-		return null;
+		try {
+			return new WorldMapPanel(world);
+		} catch (Exception e) {
+			e.printStackTrace();
+			return null;
+		}
 	}
 
 	public JPanel createSummaryPanel(World world) {

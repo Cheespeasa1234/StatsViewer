@@ -22,7 +22,7 @@ import com.google.gson.reflect.TypeToken;
 
 import util.DataParsing;
 import util.Globals;
-import util.Lib;
+import util.Utility;
 
 /**
  * A class to represent a Minecraft player
@@ -33,7 +33,7 @@ import util.Lib;
  * 
  * @see Item
  * @see Globals
- * @see Lib
+ * @see Utility
  * @see MinecraftPlayer#fixUUID()
  * @see MinecraftPlayer#addStats(File, File)
  * @see MinecraftPlayer#addAdvancements(File, File)

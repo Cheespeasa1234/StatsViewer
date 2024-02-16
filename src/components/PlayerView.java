@@ -1,6 +1,4 @@
-package pages;
-
-import main.ListPanel;
+package components;
 
 import java.awt.Dimension;
 import java.util.ArrayList;
@@ -18,7 +16,7 @@ import player.Advancement;
 import player.Item;
 import player.MinecraftPlayer;
 import util.Globals;
-import util.Lib;
+import util.Utility;
 
 /**
  * The WorldView class is used to display information about a specific world.
@@ -28,7 +26,7 @@ import util.Lib;
  * @see MinecraftPlayer
  * @see ListPanel
  * @see Globals
- * @see Lib
+ * @see Utility
  * @author Nate Levison, February 2024
  */
 public class PlayerView extends JPanel {
@@ -101,8 +99,8 @@ public class PlayerView extends JPanel {
 		for (String advancement : advancementNames) {
 			Advancement a = player.advancements.get(advancement);
 			if (a.done) {
-				panel.addLabel(advancement + ": " + Lib.getTimeSince(a.getCompleted()),
-						Lib.getSecondsSince(a.getCompleted()));
+				panel.addLabel(advancement + ": " + Utility.getTimeSince(a.getCompleted()),
+						Utility.getSecondsSince(a.getCompleted()));
 			}
 		}
 		JPanel mainPanel = new JPanel();
@@ -176,7 +174,7 @@ public class PlayerView extends JPanel {
 				player.stats.get(tabName).entrySet());
 		entries.sort(Map.Entry.<String, Double>comparingByValue().reversed());
 		for (HashMap.Entry<String, Double> entry : entries) {
-			scrollableLabelPanel.addLabel(entry.getKey() + ": " + Lib.doubleToString(entry.getValue()),
+			scrollableLabelPanel.addLabel(entry.getKey() + ": " + Utility.doubleToString(entry.getValue()),
 					entry.getValue());
 		}
 

@@ -1,9 +1,20 @@
 package world;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
+
+import javax.swing.JDialog;
+import javax.swing.JFrame;
+import javax.swing.JOptionPane;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
 
 import com.google.gson.annotations.Expose;
 import com.google.gson.annotations.SerializedName;
+
+import main.DialogManager;
 
 public class World {
 	@Expose @SerializedName("Difficulty") public int difficulty;
@@ -35,4 +46,27 @@ public class World {
 	@Expose @SerializedName("GameRules") public Map<String, String> gamerules;
 
 	@Expose @SerializedName("LevelName") public String name;
+
+	public File[] regionFiles;
+	public RegionParser[] regions;
+
+	boolean finished = false;
+
+	public void setRegionFiles(File[] regionFiles) throws IOException, Exception {
+		this.regionFiles = regionFiles;
+		this.regions = new RegionParser[regionFiles.length];
+
+		try {
+			for (int i = 0; i < regionFiles.length; i++) {
+				setRegionFile(regionFiles, i);
+			}
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
+	}
+
+	private void setRegionFile(File[] regionFiles, int i) throws IOException, Exception {
+		this.regions[i] = new RegionParser();
+		regions[i].parse(regionFiles[i]);
+	}
 }
