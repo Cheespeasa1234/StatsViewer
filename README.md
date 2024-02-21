@@ -1,5 +1,5 @@
 # Minecraft StatsViewer
-Minecraft StatsViewer - or StatsViewer - is a (mostly) standalone Java program that reads minecraft server / world files and displays statistics and other information in a human-consumable format.
+Minecraft StatsViewer - or StatsViewer - is a (mostly) standalone Java program that reads minecraft server / world files and displays statistics and other information in a human-consumable format. It also displays biomes and structures.
 StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interface that easily keeps track of the information it processes.
 
 ## Contents
@@ -25,18 +25,14 @@ StatsViewer uses Java Swing (AWT) to have a fairly consistent and usable interfa
 * Previously opened server storage
 * User & UUID display
 * Display users' inventory, advancements, statistics, and filenames
+* Display world's seed, name, version, and gamerules
+* Display biomes and structures
+* Threading and progress info to keep the UI responsive
 * Sort all information by related values, such as slots, A-Z, and count
 * High performance allowing for rapid development and expansion
 * Detailed and extensive library of code to make it easy to expand codebase
 
 ## Dependencies
-* Python 3.8+, in path using "python" or "python3"
-    * If you haven't installed, you can get it [here](https://www.python.org/downloads/)
-    * Make sure if you are on Windows, you have the "Add to PATH" option checked
-    * Use `python --version` or `python3 --version` to check if it is installed
-* The pip package "nbtlib"
-    * Use `pip install nbtlib` or `pip3 install nbtlib` to install it
-    * Use `pip show nbtlib` or `pip3 show nbtlib` to check if it is installed
 * A JDK / JRE able to run Java 17+ programs
     * If you haven't installed, you can get it [here](https://www.oracle.com/java/technologies/javase-jdk11-downloads.html)
     * Make sure you have the `java` command in your path
@@ -76,36 +72,39 @@ Some information can not be fit into standard documentation format, so it is pro
 
 The StatsViewer program is organized into three packages with (mostly) separate purposes.
 Here is a brief overview of the packages and their contents:
-* `main` - The main package. Contains the main class, and the classes that manage the GUI and the program. Also includes library classes.
-    * `main.DependencyChecker.java` - Static class that checks that python and nbtlib are available.
-    * `main.Globals.java` - Static class that holds global variables and constants.
-    * `main.Lib.java` - Static class that holds library functions and classes, and manages globals.
-    * `main.ListPanel.java` - An extension of the JPanel class that makes it easier to display lists of items with sorting features and dynamic formatting.
-    * `main.QuantityLabel.java` - An extension of the JLabel class that makes it easier to display labels with built in data, solely compatible with ListPanel.
-    * `main.StatsViewer.java` - The main class that runs the program and manages the GUI.
+* `main` - The main package. Contains the main class, and the classes that manage the GUI and the program.
+    * `BlankPanel.java` - The first page of the program. It handles server selection and tracking.
+    * `DialogManager.java` - The static class that manages the progress bar popups.
+    * `MainPanel.java` - The second page of the program. It displays player info, world info, and handles most interactions.
+    * `StatsViewer.javav` - The main class. It starts the program and handles the main GUI.
 
-* `pages` - The AWT component package. Each class is a component that is used in the main GUI.
-    * `pages.BlankPanel.java` - First page that displays the open server and previous server buttons.
-    * `pages.BottomPanelWorlds.java` - The component of the second page when in Worlds mode.
-    * `pages.BottomPanelPlayers.java` - The component of the second page when in Players mode.
-    * `pages.MainPanel.java` - The container component which is the second page. It contains the top panel and the bottom panel and manages the layout.
-    * `pages.PlayerView.java` - A wrapper component that displays all the information about a user. It includes the inventory, advancements, and statistics tabs, and the user's name and UUID.
-    * `pages.WorldView.java` - A wrapper component that displays all the information about a world. It includes the world's seed, name, and version, and the gamerules.
-    * `pages.TopPanel.java` - The top bar on the main page that allows you to exit, and shows the loading speed.
+* `util` - The utility package. Contains libraries, utilities, and global state management.
+    * `DataParsing.java` - Contains utility functions for files, JSON parsing, and NBT parsing.
+    * `Globals.java` - The main manager of global state and constants. It is mostly static.
+    * `Utility.java` - The main library of utility functions. It is mostly static.
+
+* `components` - The AWT component package. Each class is a component that is used in the main GUI.
+    * `BottomPanelPlayers.java` - The bottom section for the players view. Handles the player list and the player view.
+    * `BottomPanelWorlds.java` - The same as `BottomPanelPlayers`, but for worlds.
+    * `ListPanel.java` - A utility component that lists strings, and provides dynamic sorting functionality.
+    * `PlayerView.java` - A wrapper class for the `MinecraftPlayer` class. It displays the player's information.
+    * `QuantityLabel.java` - A utility component, which is a JLabel but with more data for sorting purposes.
+    * `TopPanel.java` - The top section of the program. Contains the server selection and the exit button.
+    * `WorldMapPanel.java` - The panel that displays the biome and structure map, and region selection.
+    * `WorldView.java` - A wrapper class for the `World` class. It displays the world's information.
 
 * `player` - The player data package. Mostly static classes, but the Item class is not.
-    * `player.Advancement.java` - A class that holds the data for an advancement. Used by the deserializer.
-    * `player.Inventory.java` - A class that holds the data for an inventory. Used by the deserializer.
-    * `player.Item.java` - The class that holds the info of an item, and provides methods for display and comparison.
-    * `player.MinecraftPlayer.java` - The class that contains all info about a player, and is used by the PlayerView class to display the information. It is partially created with the deserializer, and partially created with some methods. It is the main class of the package.
-    * `player.UsercachePlayer.java` - A class that holds the data for a usercache entry. Used by the deserializer. Only used to store UUID and name linking.
-    * `player.World.java` - A class that holds the data for a world. Used by the deserializer.
+    * `Advancement.java` - The class that stores advancement data. Deserialized by Gson.
+    * `Inventory.java` - The class that stores inventory data. Deserialized by Gson.
+    * `MinecraftPlayer.java` - Contains a player's inventory, stats, and caching info.
+    * `Item.java` - The class that stores item data. Deserialized by Gson.
+    * `UsercachePlayer.java` - The class that stores usercache data. Deserialized by Gson.
 
-* Other source files
-    * `de-nbt.py` - Python script that uses nbtlib to turn NBT files into JSON files. Also roughly formats everything.
-    * `format-stat.py` - Python script that formats the statistics JSON file into a format that can be parsed lazily by the statistics functions.
-    * `recent_directories.txt` - A file that stores the last 5 directories that were opened by the program. It is used to display the buttons on the first page.
-    * `src/main/icon.png` - The icon of the program. Unused.
+* `world` - The world data package. Mostly static classes.
+    * `Chunk.java` - The class that stores chunk data, and file locators.
+    * `RegionParser.java` - The class that handles all decompression and parsing of region files.
+    * `World.java` - The class that stores world data.
+    * `WorldGenSettings.java` - The class that stores world generation settings. Deserialized by Gson.
 
 ## Library Resources
 
@@ -233,10 +232,10 @@ This project is fully open sourced, so just make a PR if you want to change some
 ## How to code in this project
 
 This section is about where a bug might be:
-- __Something with the display of a player__: `player.MinecraftPlayer`, `pages.PlayerView`
-- __Something with the display of a world__: `player.World`, `pages.WorldView`
-- __Something with files not being read__: `main.Globals`, `main.Lib`
-- __Something with the main UI components__: `main.ListPanel`, `main.QuantityLabel`, the `pages` module, `player.UsercachePlayer`
+- __Something with the display of a player__: `MinecraftPlayer`, `PlayerView`
+- __Something with the display of a world__: `World`, `WorldView`
+- __Something with files not being read__: `Globals`, `Utility`
+- __Something with the main UI components__: `ListPanel`, `QuantityLabel`, the `components` module, `UsercachePlayer`
 
 Those are the most common bugs I found during developement, and what file(s) they tended to be caused by. 
 Now, here are the core design principles of this project. I try to follow these while coding, so if you contribute, you should as well:
