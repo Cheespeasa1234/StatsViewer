@@ -1,6 +1,7 @@
 package util;
 
 import java.awt.Font;
+import java.io.File;
 
 /**
  * This class contains all the global variables used throughout the program
@@ -43,7 +44,7 @@ public class Globals {
      * @see DependencyChecker
      * @see DependencyChecker#checkDependencies()
      */
-    public static final String RECENTS_FILE_PATH = "recent_directories.txt";
+    public static final String RECENTS_FILE_DIRECTORY = "recent_directories.txt";
 
     /**
      * The directory to store formatted files by the statsviewer
@@ -54,8 +55,13 @@ public class Globals {
 
     /**
      * The current world being read
-     * Changed by the {@link pages.BlankPanel} file chooser
+     * Changed by the {@link main.BlankPanel} file chooser
      * @see BlankPanel
      */
     public static String OPEN_WORLD_NAME = "";
+
+    /**
+     * 
+     */
+    public static File SERVER_DIRECTORY;
 }

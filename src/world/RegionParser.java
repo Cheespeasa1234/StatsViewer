@@ -1,54 +1,28 @@
 package world;
 
-import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.zip.DataFormatException;
 import java.util.zip.Inflater;
 
-import net.querz.nbt.io.NBTInputStream;
-import net.querz.nbt.io.NamedTag;
+import javax.swing.JDialog;
+import javax.swing.JProgressBar;
+import javax.swing.SwingUtilities;
+
+import main.DialogManager;
+import util.DataParsing;
 
 public class RegionParser {
 
     private static final int SECTOR_SIZE = 4096;
     private static final int CHUNK_COUNT = 1024;
 
-    public static class Logger {
-        private long start;
-        private String task;
-        private String title;
-
-        public Logger(String title) {
-            this.title = title;
-        }
-
-        public void startTask(String task) {
-            this.task = task;
-            this.start = System.currentTimeMillis();
-        };
-
-        public void endTask() {
-            System.out.println("[" + title + "] " + task + " took " + (System.currentTimeMillis() - start) + "ms");
-        }
-    }
-
-    public static class Chunk {
-        public NamedTag nbt;
-        public Locator locator;
-
-        public Chunk(byte[] decompressedData, Locator locator) throws IOException {
-            NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(decompressedData)).readTag(64);
-            this.nbt = nbtTag;
-            this.locator = locator;
-        }
-
-        public void printNBT() {
-            System.out.println(this.nbt.getTag().toString(64));
-        }
-    }
+    public Chunk[] chunks = new Chunk[CHUNK_COUNT];
+    public Locator[] locators = new Locator[CHUNK_COUNT];
+    public byte[] header = new byte[SECTOR_SIZE];
 
     public static class Locator {
         public byte offx4, offx2, offx1, sectorCount;
@@ -76,81 +50,75 @@ public class RegionParser {
         }
     }
 
-    private static Chunk[] chunks = new Chunk[CHUNK_COUNT];
-    private static Locator[] locators = new Locator[CHUNK_COUNT];
-    private static byte[] header = new byte[SECTOR_SIZE];
+    private int chunkConsumed = 0;
+    public File fileConsumed = null;
 
-    public static byte[] decompressZlib(byte[] compressedData) {
-        try {
-            Inflater inflater = new Inflater();
-            inflater.setInput(compressedData);
-
-            ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedData.length);
-
-            byte[] buffer = new byte[1024];
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                outputStream.write(buffer, 0, count);
-            }
-
-            outputStream.close();
-            inflater.end();
-
-            return outputStream.toByteArray();
-        } catch (Exception e) {
-            e.printStackTrace();
-            return null;
-        }
+    /**
+     * Get the number of chunks consumed
+     * 
+     * @return the number of chunks consumed
+     */
+    public int getChunkConsumed() {
+        return chunkConsumed;
     }
 
-    public static ByteArrayOutputStream decompressZlib_old(byte[] compressedData)
-            throws DataFormatException, IOException {
-        // Skip the first five bytes
-        byte[] compressedDataWithoutHeader = new byte[compressedData.length - 5];
-        for (int i = 0; i < compressedDataWithoutHeader.length; i++) {
-            compressedDataWithoutHeader[i] = compressedData[i + 5];
-        }
-
-        // Create a new Inflater to decompress the data
-        Inflater inflater = new Inflater();
-        inflater.setInput(compressedDataWithoutHeader);
-
-        // Create a ByteArrayOutputStream to hold the decompressed data
-        ByteArrayOutputStream outputStream = new ByteArrayOutputStream(compressedDataWithoutHeader.length);
-
-        // Create a byte array to hold the decompressed data temporarily
-        byte[] buffer = new byte[SECTOR_SIZE];
-        try {
-            while (!inflater.finished()) {
-                int count = inflater.inflate(buffer);
-                if (count == 0 && inflater.needsInput()) {
-                    // Check if the inflater needs more input, indicating that the buffer might be incomplete
-                    throw new DataFormatException("Incomplete input data");
-                }
-                outputStream.write(buffer, 0, count);
-            }
-        } catch (DataFormatException e) {
-            // Handle the exception and print diagnostic information
-            System.err.println("Error decompressing data: " + e.getMessage());
-            System.err.println("Compressed data length: " + compressedData.length);
-            // Print the buffer contents
-            System.err.println("Buffer content: " + Arrays.toString(compressedData));
-            throw e; // Rethrow the exception
-        } finally {
-            // Close the streams and end the inflater
-            inflater.end();
-            outputStream.close();
-        }
-
-        // Return the decompressed data as a byte array
-        return outputStream;
+    /**
+     * Returns whether the file has been fully parsed
+     * 
+     * @return whether the file has been fully parsed
+     */
+    public boolean isFinished() {
+        return chunkConsumed == CHUNK_COUNT;
     }
 
-    public static void main(String[] args) throws IOException, Exception {
+    /**
+     * Consume the next chunk, decompress it, and store it in the chunks array
+     * Used to parse the region file one by one
+     * Also updates the progress bar
+     * 
+     * @throws IOException if there is an error reading the file
+     */
+    public void consumeChunk() throws IOException {
+        FileInputStream fis = new FileInputStream(fileConsumed.getAbsolutePath());
+        fis.skip(locators[chunkConsumed].offsetBytes());
 
+        byte[] metadata = new byte[5];
+        fis.read(metadata);
+
+        byte[] data = new byte[locators[chunkConsumed].sizeBytes()];
+        fis.read(data);
+
+		if (metadata[0] == 0x00 && metadata[1] == 0x00 && metadata[2] == 0x00 && metadata[3] == 0x00 && metadata[4] == 0x00) {
+			chunks[chunkConsumed] = new Chunk();
+		} else {
+			byte compression = metadata[4];
+			if (compression == 0x00) {
+				System.err.println("Invalid compression type: " + String.format("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", metadata[0], metadata[1], metadata[2], metadata[3], metadata[4], compression));
+			} else if (compression != 0x02) {
+				System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
+			} else {
+				byte[] decompressed = DataParsing.decompressZlib(data);
+				chunks[chunkConsumed] = new Chunk();
+				chunks[chunkConsumed].setRegionData(decompressed);
+			}
+		}
+
+        fis.close();
+        chunkConsumed++;
+    }
+
+    /**
+     * Start parsing the region file, and show the progress bar
+     * 
+     * @param file the region file to parse
+     * @throws IOException if there is an error reading the file
+     * @throws Exception if there is an error parsing the file
+     */
+    public void startParse(File file) throws IOException, Exception {
         // Open the file
-        String filePath = "/Users/nlevison25/server/decoyworld/r.0.0.mca";
-        FileInputStream fis = new FileInputStream(filePath);
+        fileConsumed = file;
+        FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+        DialogManager.show(1024);
 
         // Read the locators, skip timestamps
         fis.read(header);
@@ -161,30 +129,35 @@ public class RegionParser {
             locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2],
                     header[byteIdx + 3]);
         }
+    }
 
-        // Read the chunks
-        for (int chunkIdx = 0; chunkIdx < CHUNK_COUNT; chunkIdx++) {
-            fis = new FileInputStream(filePath);
-            fis.skip(locators[chunkIdx].offsetBytes());
+	private boolean debug = false;
 
-            byte[] metadata = new byte[5];
-            fis.read(metadata);
+	/**
+	 * Start parsing the region file, and show the progress bar
+	 * 
+	 * @param file the region file to parse
+	 * @param debug whether to print debug information
+	 * @throws IOException if there is an error reading the file
+	 * @throws Exception if there is an error parsing the file
+	 */
 
-            byte[] data = new byte[locators[chunkIdx].sizeBytes()];
-            fis.read(data);
+	public void startParse(File file, boolean debug) throws IOException, Exception {
+		this.debug = debug;
+        // Open the file
+        fileConsumed = file;
+        FileInputStream fis = new FileInputStream(file.getAbsolutePath());
+        DialogManager.show(1024);
 
-            byte compression = metadata[4];
-            if (compression != 0x02) {
-                System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
-                System.exit(-1);
-            } else {
-                byte[] decompressed = decompressZlib(data);
-                chunks[chunkIdx] = new Chunk(decompressed, locators[chunkIdx]);
-                chunks[chunkIdx].printNBT();
-            }
-            fis.close();
+        // Read the locators, skip timestamps
+        fis.read(header);
+        fis.skip(SECTOR_SIZE);
+        fis.close();
+        for (int byteIdx = 0; byteIdx < header.length; byteIdx += 4) {
+            int locatorIdx = byteIdx / 4;
+            locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2],
+                    header[byteIdx + 3]);
         }
-
     }
 
 }

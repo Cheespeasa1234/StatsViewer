@@ -1,15 +1,23 @@
-package pages;
-
-import main.ListPanel;
+package components;
 
 import java.awt.Dimension;
+import java.io.File;
+import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Map;
 
+import javax.swing.DefaultListModel;
 import javax.swing.JLabel;
+import javax.swing.JList;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
+import javax.swing.ListSelectionModel;
+import java.awt.BorderLayout;
 
+import player.MinecraftPlayer;
 import util.Globals;
+import world.RegionParser;
 import world.World;
 
 public class WorldView extends JPanel {
@@ -27,8 +35,43 @@ public class WorldView extends JPanel {
 		this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
 	}
 
-	public JPanel createGenerationPanel(World world) {
-		return null;
+	public JPanel createGenerationPanel(World world) throws IOException, Exception {
+		JPanel generationPanel = new JPanel(new BorderLayout());
+
+		File[] regions = world.regionFiles;
+
+		WorldMapPanel worldMapPanel = new WorldMapPanel(world, regions[0].getName());
+		JScrollPane scrollPane = new JScrollPane(worldMapPanel);
+		
+		DefaultListModel<String> regionListModel = new DefaultListModel<>();
+		JList<String> regionList = new JList<>(regionListModel);
+		regionList.getSelectionModel().addListSelectionListener(e -> {
+            ListSelectionModel lsm = ((ListSelectionModel) e.getSource());
+            if (lsm.isSelectionEmpty() || lsm.getValueIsAdjusting()) {
+                return;
+            }
+            
+			// get the selected region
+			int idx = lsm.getMinSelectionIndex();
+			RegionParser region = world.regions[idx];
+			File f = region.fileConsumed;
+
+			// set the world map panel to the selected region
+			try {
+				worldMapPanel.reset(world, f.getName());
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
+        });
+
+		for (File region : regions) {
+			regionListModel.addElement(region.getName());
+		}
+
+		generationPanel.add(regionList, BorderLayout.WEST);
+
+		generationPanel.add(scrollPane, BorderLayout.CENTER);
+		return generationPanel;
 	}
 
 	public JPanel createSummaryPanel(World world) {
@@ -75,7 +118,7 @@ public class WorldView extends JPanel {
 		return gamerulesContainer;
 	}
 
-	public void setWorld(World world) {
+	public void setWorld(World world) throws IOException, Exception {
 
 		// reset everything
 		this.world = world;

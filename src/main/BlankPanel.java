@@ -1,4 +1,4 @@
-package pages;
+package main;
 
 import java.awt.Dimension;
 import java.awt.Font;
@@ -12,7 +12,7 @@ import javax.swing.JOptionPane;
 import javax.swing.JPanel;
 
 import util.Globals;
-import util.Lib;
+import util.Utility;
 
 public class BlankPanel extends JPanel {
 
@@ -20,7 +20,6 @@ public class BlankPanel extends JPanel {
         public void onFileChosen(File file);
     }
 
-    private File serverDirectory = null;
     private JLabel label;
     private JButton locateButton;
     private JButton prevButton;
@@ -36,16 +35,16 @@ public class BlankPanel extends JPanel {
         this.fileChosenListener = fileChosenListener;
         this.locateButton.addActionListener(e -> {
             JFileChooser fc = new JFileChooser();
-            Lib.setFontRecursively(fc, f);
+            Utility.setFontRecursively(fc, f);
             fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
             int returnVal = fc.showOpenDialog(this);
             if (returnVal == JFileChooser.APPROVE_OPTION) {
-                this.serverDirectory = fc.getSelectedFile();
-                this.label.setText("Server directory: " + serverDirectory.getAbsolutePath());
+                Globals.SERVER_DIRECTORY = fc.getSelectedFile();
+                this.label.setText("Server directory: " + Globals.SERVER_DIRECTORY.getAbsolutePath());
 
                 // find all subdirectories of the current directory
-                File[] allFiles = this.serverDirectory.listFiles();
+                File[] allFiles = Globals.SERVER_DIRECTORY.listFiles();
                 ArrayList<String> worldCandidates = new ArrayList<String>();
 
                 for (File file : allFiles) {
@@ -77,13 +76,13 @@ public class BlankPanel extends JPanel {
                 }
                 System.out.println("World name: " + Globals.OPEN_WORLD_NAME);
 
-                this.fileChosenListener.onFileChosen(serverDirectory);
-                Lib.addRecent(serverDirectory.getAbsolutePath());
+                this.fileChosenListener.onFileChosen(Globals.SERVER_DIRECTORY);
+                Utility.addRecent(Globals.SERVER_DIRECTORY.getAbsolutePath());
             }
 
         });
         this.prevButton.addActionListener(e -> {
-            String[] recentDirectories = Lib.readRecentDirectories().toArray(new String[0]);
+            String[] recentDirectories = Utility.readRecentDirectories().toArray(new String[0]);
             String chosen = (String) JOptionPane.showInputDialog(
                     this,
                     "Select a recent directory",
@@ -93,11 +92,11 @@ public class BlankPanel extends JPanel {
                     recentDirectories,
                     recentDirectories[0]);
             if (chosen != null) {
-                this.serverDirectory = new File(chosen);
-                this.label.setText("Server directory: " + serverDirectory.getAbsolutePath());
+                Globals.SERVER_DIRECTORY = new File(chosen);
+                this.label.setText("Server directory: " + Globals.SERVER_DIRECTORY.getAbsolutePath());
 
                 // find all subdirectories of the current directory
-                File[] allFiles = this.serverDirectory.listFiles();
+                File[] allFiles = Globals.SERVER_DIRECTORY.listFiles();
                 ArrayList<String> worldCandidates = new ArrayList<String>();
 
                 for (File file : allFiles) {
@@ -129,8 +128,8 @@ public class BlankPanel extends JPanel {
                 }
                 System.out.println("World name: " + Globals.OPEN_WORLD_NAME);
 
-                this.fileChosenListener.onFileChosen(serverDirectory);
-                Lib.addRecent(serverDirectory.getAbsolutePath());
+                this.fileChosenListener.onFileChosen(Globals.SERVER_DIRECTORY);
+                Utility.addRecent(Globals.SERVER_DIRECTORY.getAbsolutePath());
             }
         });
 

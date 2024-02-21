@@ -1,9 +1,9 @@
-package pages;
+package main;
 
 import player.MinecraftPlayer;
 import player.UsercachePlayer;
 import util.Globals;
-import util.Lib;
+import util.Utility;
 import world.World;
 
 import java.awt.BorderLayout;
@@ -24,6 +24,10 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.annotations.Expose;
 import com.google.gson.reflect.TypeToken;
+
+import components.BottomPanelPlayers;
+import components.BottomPanelWorlds;
+import components.TopPanel;
 
 public class MainPanel extends JPanel {
 
@@ -96,15 +100,19 @@ public class MainPanel extends JPanel {
 		Gson gson = new GsonBuilder()
 				.excludeFieldsWithoutExposeAnnotation()
 				.create();
-		System.out.println(gson.toJson(worldFolders));
 
 		for (File worldFolder : worldFolders) {
 			String path = worldFolder.getAbsolutePath() + "/level.json";
 			String worldName = worldFolder.getName();
 			path = path.replace(worldName, ".statsviewer/" + worldName);
-			String levelDatString = Lib.fileToString(path);
+			String levelDatString = Utility.fileToString(path);
 			JsonObject levelDatJsonObj = gson.fromJson(levelDatString, JsonObject.class);
 			World world = gson.fromJson(levelDatJsonObj.get("Data"), World.class);
+			File regionFolder = new File(worldFolder.getAbsolutePath() + "/region");
+			System.out.println("Region folder: " + regionFolder.getAbsolutePath());
+			world.regionFiles = regionFolder.listFiles();
+			System.out.println("Region files: " + world.regionFiles.length);
+
 			worlds.add(world);
 			bottomPanelWorldsMode.worlds.add(world);
 			bottomPanelWorldsMode.listModel.addElement(world.name);
@@ -118,9 +126,9 @@ public class MainPanel extends JPanel {
 
 		long start = System.currentTimeMillis();
 
-		File playerDataDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/playerdata");
-		File playerStatsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/stats");
-		File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Lib.getLocation() + "/advancements");
+		File playerDataDirectory = new File(server.getAbsolutePath() + Utility.getSpecialLocation() + "/playerdata");
+		File playerStatsDirectory = new File(server.getAbsolutePath() + Utility.getSpecialLocation() + "/stats");
+		File playerAdvancementsDirectory = new File(server.getAbsolutePath() + Utility.getSpecialLocation() + "/advancements");
 
 		// get a list of cached user
 		File usercacheFile = new File(server.getAbsolutePath() + "/usercache.json");
@@ -152,7 +160,7 @@ public class MainPanel extends JPanel {
 					+ playerFile.getName().replace(".dat", ".json"));
 			try {
 
-				String playerFileString = Lib.fileToString(playerFile.getAbsolutePath());
+				String playerFileString = Utility.fileToString(playerFile.getAbsolutePath());
 				MinecraftPlayer player = gson
 						.fromJson(playerFileString, MinecraftPlayer.class)
 						.addUUID()
@@ -173,11 +181,11 @@ public class MainPanel extends JPanel {
 
 		// load whitelist, bans, and ops
 
-		List<PermsPlayer> whitelist = gson.fromJson(Lib.fileToString(server.getAbsolutePath() + "/whitelist.json"),
+		List<PermsPlayer> whitelist = gson.fromJson(Utility.fileToString(server.getAbsolutePath() + "/whitelist.json"),
 				new TypeToken<List<PermsPlayer>>() {}.getType());
-		List<PermsPlayer> ops = gson.fromJson(Lib.fileToString(server.getAbsolutePath() + "/ops.json"),
+		List<PermsPlayer> ops = gson.fromJson(Utility.fileToString(server.getAbsolutePath() + "/ops.json"),
 				new TypeToken<List<PermsPlayer>>() {}.getType());
-		List<PermsPlayer> bans = gson.fromJson(Lib.fileToString(server.getAbsolutePath() + "/banned-players.json"),
+		List<PermsPlayer> bans = gson.fromJson(Utility.fileToString(server.getAbsolutePath() + "/banned-players.json"),
 				new TypeToken<List<PermsPlayer>>() {}.getType());
 
 		for (PermsPlayer p : whitelist) {
