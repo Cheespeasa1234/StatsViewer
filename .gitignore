@@ -1,4 +1,9 @@
 /bin/*
 /bin/**/*
+/.vscode/**/*
+/.vscode/*
+/.vscode
 .DS_Store
 /out/*
+*.code-workspace
+recent_directories.txt
