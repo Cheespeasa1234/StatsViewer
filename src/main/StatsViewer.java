@@ -11,7 +11,6 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
-import javax.swing.DefaultListModel;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
@@ -21,6 +20,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import util.DataParsing;
 import util.Globals;
 import util.Utility;
+import world.RegionParser;
 
 /**
  * The main class for the Minecraft Statistics Viewer
@@ -39,14 +39,27 @@ import util.Utility;
  */
 public class StatsViewer extends JPanel implements KeyListener {
 
-    File serverDirectory = null;
+    private ArrayList<JPanel> pages = new ArrayList<JPanel>(); // list of pages
+    private BlankPanel blankPanel; // the panel for choosing the directory
+    private MainPanel statsPanel; // the panel for viewing the statistics
 
-    ArrayList<JPanel> pages = new ArrayList<JPanel>();
-    BlankPanel blankPanel;
-    MainPanel statsPanel;
-    DefaultListModel<String> listModel;
-
+    /**
+     * Converts the files in the given directory to JSON format
+     * 
+     * @param dir the directory to convert
+     * @throws IllegalArgumentException if the file is null, does not exist, or is not a directory
+     * @throws IllegalArgumentException if there is an error creating the file
+     * @throws IllegalArgumentException if the file is null
+     */
     private void convertFiles(File dir) {
+
+        if (dir == null) {
+            throw new IllegalArgumentException("File cannot be null");
+        } else if (!dir.exists()) {
+            throw new IllegalArgumentException("File must exist");
+        } else if (!dir.isDirectory()) {
+            throw new IllegalArgumentException("File must be a directory");
+        }
 
         // parse the level.dat
         Path inFile = Paths.get(dir + "/" + Globals.OPEN_WORLD_NAME + "/level.dat");
@@ -128,6 +141,10 @@ public class StatsViewer extends JPanel implements KeyListener {
         }
     }
 
+    /**
+     * Creates the pages for the program, and makes them visible
+     * Also enforces fonts and the look and feel
+     */
     private void createPages() {
 
         // Set the choosing panel
@@ -149,6 +166,10 @@ public class StatsViewer extends JPanel implements KeyListener {
 
     }
 
+    /**
+     * Constructor for the StatsViewer class
+     * Sets UI look and feel, creates pages, and adds key listener
+     */
     public StatsViewer() {
 
         this.setFocusable(true);
@@ -170,14 +191,37 @@ public class StatsViewer extends JPanel implements KeyListener {
         createPages();
     }
 
+    /**
+     * Adds a page to the list of pages
+     * 
+     * @param page the page to add
+     * @throws IllegalArgumentException if the page is null
+     * @throws IllegalArgumentException if the page is already in the list
+     */
     private void addPage(JPanel page) {
+        if (page == null) {
+            throw new IllegalArgumentException("Page cannot be null");
+        } else if (pages.contains(page)) {
+            throw new IllegalArgumentException("Page already in the list");
+        }
+
         pages.add(page);
         page.setVisible(false);
         Utility.setFontRecursively(page, Globals.FONT_PRIMARY);
         this.add(page);
     }
 
+    /**
+     * Sets the page at the given index to be visible
+     * 
+     * @param idx the index of the page to set visible
+     * @throws IllegalArgumentException if the index is out of bounds
+     */
     private void setPage(int idx) {
+        if (idx < 0 || idx >= pages.size()) {
+            throw new IllegalArgumentException("Index out of bounds");
+        }
+
         for (int i = 0; i < pages.size(); i++) {
             if (i == idx)
                 pages.get(i).setVisible(true);
@@ -209,7 +253,7 @@ public class StatsViewer extends JPanel implements KeyListener {
         frame.setVisible(true);
     }
 
-    public static void main(String[] args) {
+    public static void main(String[] args) throws IOException, Exception {
         SwingUtilities.invokeLater(new Runnable() {
             public void run() {
                 createAndShowGUI();

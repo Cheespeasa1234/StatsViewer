@@ -4,6 +4,7 @@ import util.Globals;
 import world.World;
 
 import java.awt.Dimension;
+import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -36,7 +37,11 @@ public class BottomPanelWorlds extends JPanel {
                 return;
             }
             int idx = lsm.getMinSelectionIndex();
-            worldView.setWorld(worlds.get(idx));
+            try {
+				worldView.setWorld(worlds.get(idx));
+			} catch (Exception e1) {
+				e1.printStackTrace();
+			}
         });
 
         scrollPane = new JScrollPane(itemList);

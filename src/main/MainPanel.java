@@ -111,6 +111,7 @@ public class MainPanel extends JPanel {
 			File regionFolder = new File(worldFolder.getAbsolutePath() + "/region");
 			System.out.println("Region folder: " + regionFolder.getAbsolutePath());
 			world.regionFiles = regionFolder.listFiles();
+			System.out.println("Region files: " + world.regionFiles.length);
 
 			worlds.add(world);
 			bottomPanelWorldsMode.worlds.add(world);
