@@ -17,7 +17,7 @@ import com.google.gson.JsonObject;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.io.NBTInputStream;
 import util.DataParsing;
-import world.RegionParser.Locator;
+import world.Region.Locator;
 
 import util.Utility;
 
@@ -67,7 +67,7 @@ public class Chunk {
 		}
 	}
 
-	public void setRegionData(byte[] regionData) throws IOException {
+	public Chunk(byte[] regionData) throws IOException {
 		NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(regionData)).readTag(64);
 	
 		JsonObject json;
@@ -78,7 +78,7 @@ public class Chunk {
 		this.x = json.get("xPos").getAsInt();
 		this.y = json.get("yPos").getAsInt();
 		this.z = json.get("zPos").getAsInt();
-	
+
 		this.biome = getBiome(json);
 		JsonObject structures = json.getAsJsonObject("structures");
 

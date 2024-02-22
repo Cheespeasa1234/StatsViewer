@@ -1,24 +1,38 @@
 package components;
 
 import java.awt.Color;
+import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
+import java.awt.Point;
+import java.awt.event.MouseEvent;
+import java.awt.event.MouseListener;
+import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.awt.geom.Point2D;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 
+import com.google.gson.Gson;
+
 import util.Globals;
 import util.Utility;
 import world.Chunk;
-import world.RegionParser;
+import world.Region;
 import world.World;
 
-public class WorldMapPanel extends JPanel {
-    public World world;
+/**
+ * Wrapper componenent for a Region object. Region must already be parsed.
+ */
+public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionListener {
+	
+	public Region region;
     public boolean loaded = false;
+	private Point2D mouse = new Point2D.Double(0, 0);
+	private Color tooltipBG = new Color(0, 0, 0, 100);
 
     public static HashMap<String, Color> coloredBiomes = new HashMap<>() {
         {
@@ -88,52 +102,67 @@ public class WorldMapPanel extends JPanel {
         }
     };
 
-	public void reset(World world, String regionFileName) throws IOException, Exception { 
-		this.world = world;
-
-        File region = new File(Globals.SERVER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME + "/region/" + regionFileName);
-        System.out.println("Region file: " + region.getAbsolutePath());
-        File[] regionFiles = {
-                region
-        };
-        world.setRegionFiles(regionFiles, () -> {
-            this.loaded = true;
-            this.repaint();
-        });
+    public WorldMapPanel() {
+		this.addMouseListener(this);
+		this.addMouseMotionListener(this);
+		this.loaded = false;
 	}
 
-    public WorldMapPanel(World world, String regionFileName) throws IOException, Exception {
-        this.world = world;
+	public void setRegion(Region region) {
+		this.loaded = true;
+		this.region = region;
+	}
 
-        File region = new File(Globals.SERVER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME + "/region/" + regionFileName);
-        System.out.println("Region file: " + region.getAbsolutePath());
-        File[] regionFiles = {
-                region
-        };
-        world.setRegionFiles(regionFiles, () -> {
-            this.loaded = true;
-            this.repaint();
-        });
-    }
+	private void drawTooltip(Graphics2D g2, int x, int y, String[] lines) {
+		int maxWidth = 0;
+		for (String line : lines) {
+			int width = g2.getFontMetrics().stringWidth(line);
+			if (width > maxWidth) {
+				maxWidth = width;
+			}
+		}
+		maxWidth += 10;
+
+		int maxHeight = (g2.getFontMetrics().getHeight() + 5) * lines.length;
+
+		g2.setColor(tooltipBG);
+		g2.fillRoundRect((int) mouse.getX() + 10, (int) y + 10, maxWidth, maxHeight, 10, 10);
+		g2.setColor(Color.WHITE);
+		g2.drawRoundRect((int) mouse.getX() + 10, (int) y + 10, maxWidth, maxHeight, 10, 10);
+
+		int yoff = 10;
+		for (String line : lines) {
+			g2.drawString(line, (int) mouse.getX() + 15, (int) y + 15 + yoff);
+			yoff += g2.getFontMetrics().getHeight() + 5;
+		}
+
+	
+	}
 
     @Override public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
-        int width = this.getWidth();
-        int height = this.getHeight();
 
-        if (!loaded) {
-            return;
-        }
+		if (!loaded) {
+			g2.drawString("Not loaded.", 10, 10);
+			return;
+		}
 
-        int region = 0;
-        for (int i = 0; i < world.regions[region].chunks.length; i++) {
-            Chunk chunk = world.regions[region].chunks[i];
+		// get the region number
+		int regionx = region.x;
+		int regionz = region.z;
+        for (int i = 0; i < region.chunks.length; i++) {
+            Chunk chunk = region.chunks[i];
             String biome = chunk.biome;
             g2.setColor(coloredBiomes.get(biome));
-            int drawx = chunk.x * 16;
-            int drawz = chunk.z * 16;
+            int drawx = chunk.x * 16 - regionx * 512;
+            int drawz = chunk.z * 16 - regionz * 512;
             g2.fillRect(drawx, drawz, 16, 16);
+
+			// DEBUG STUFF
+			// g2.setColor(Color.BLACK);
+			// g2.drawString(chunk.x + "", drawx + 5, drawz + 5);
+			// g2.drawString(chunk.z + "", drawx + 5, drawz + 10);
 
 			// draw the structure
 			if (chunk.structures != null && chunk.structures.size() > 0) {
@@ -145,5 +174,42 @@ public class WorldMapPanel extends JPanel {
 				}
 			}
         }
-    }
+    
+		int chunkx = (int) Math.floor(mouse.getX() / 16);
+		int chunkz = (int) Math.floor(mouse.getY() / 16);
+		Chunk chunk = region.chunks[chunkx + chunkz * 32];
+
+		String[] tooltip = new String[2 + chunk.structures.size()];
+		tooltip[0] = "Biome: " + chunk.biome;
+		tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
+		for (int i = 0; i < chunk.structures.size(); i++) {
+			tooltip[i + 2] = chunk.structures.get(i);
+		}
+
+		drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
+		
+	}
+
+	@Override public void mouseMoved(MouseEvent e) {
+		mouse = e.getPoint();
+		repaint();
+	}
+
+	@Override public void mouseDragged(MouseEvent e) {
+	}
+
+	@Override public void mouseClicked(MouseEvent e) {
+	}
+
+	@Override public void mousePressed(MouseEvent e) {
+	}
+
+	@Override public void mouseReleased(MouseEvent e) {
+	}
+
+	@Override public void mouseEntered(MouseEvent e) {
+	}
+
+	@Override public void mouseExited(MouseEvent e) {
+	}
 }

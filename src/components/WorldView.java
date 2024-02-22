@@ -13,20 +13,33 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTabbedPane;
 import javax.swing.ListSelectionModel;
+import javax.swing.SwingUtilities;
+
+import main.DialogManager;
+
 import java.awt.BorderLayout;
 
-import player.MinecraftPlayer;
 import util.Globals;
-import world.RegionParser;
+import world.Region;
 import world.World;
 
+/**
+ * Wrapper class for the World object.
+ * Displays the world's information in a tabbed pane.
+ */
 public class WorldView extends JPanel {
-	JLabel status;
-	JTabbedPane tabs;
-	World world;
 
-	private final int WIDTH = Globals.PREF_W - 250;
+	private JLabel status;
+	private JTabbedPane tabs;
+	private World world;
+	private WorldMapPanel worldMapPanel;
 
+	private static final int WIDTH = Globals.PREF_W - 250;
+
+	/**
+	 * Create the WorldView. Everything is null, you need to call setWorld() to set the world.
+	 * @see #setWorld(World)
+	 */
 	public WorldView() {
 		status = new JLabel("No world selected.");
 		tabs = new JTabbedPane();
@@ -35,46 +48,76 @@ public class WorldView extends JPanel {
 		this.setPreferredSize(new Dimension(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT));
 	}
 
-	public JPanel createGenerationPanel(World world) throws IOException, Exception {
+	/**
+	 * Create the generation panel for the world.
+	 * @param world The world to create the panel for.
+	 * @return The JPanel containing the generation panel.
+	 * @throws IOException
+	 * @throws Exception
+	 */
+	private JPanel createGenerationPanel(World world) throws IOException, Exception {
+
+		// Create the main container
 		JPanel generationPanel = new JPanel(new BorderLayout());
 
+		// Create the fancy map display, and the list of regions
 		File[] regions = world.regionFiles;
-
-		WorldMapPanel worldMapPanel = new WorldMapPanel(world, regions[0].getName());
+		worldMapPanel = new WorldMapPanel();
+		worldMapPanel.setPreferredSize(new Dimension(933, 512));
 		JScrollPane scrollPane = new JScrollPane(worldMapPanel);
-		
+
+		// Create the AWT list component stuff
 		DefaultListModel<String> regionListModel = new DefaultListModel<>();
 		JList<String> regionList = new JList<>(regionListModel);
+
+		// Add a listener to the list so that when a region is selected, the mapPanel switches
 		regionList.getSelectionModel().addListSelectionListener(e -> {
-            ListSelectionModel lsm = ((ListSelectionModel) e.getSource());
-            if (lsm.isSelectionEmpty() || lsm.getValueIsAdjusting()) {
-                return;
-            }
-            
+			ListSelectionModel lsm = ((ListSelectionModel) e.getSource());
+			if (lsm.isSelectionEmpty() || lsm.getValueIsAdjusting()) {
+				return;
+			}
+			
 			// get the selected region
 			int idx = lsm.getMinSelectionIndex();
-			RegionParser region = world.regions[idx];
-			File f = region.fileConsumed;
+			String regionName = regionListModel.getElementAt(idx);
 
-			// set the world map panel to the selected region
-			try {
-				worldMapPanel.reset(world, f.getName());
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
-        });
+			new Thread(() -> {
+				try {
+					// set the world map panel to the selected region
+					Region region = new Region(new File(Globals.SERVER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME + "/region/" + regionName));
+					while (!region.isFinished()) {
+						region.consumeChunk();
+						SwingUtilities.invokeLater(() -> {
+							DialogManager.setCount(region.getChunkConsumed());
+						});
+					}
+					DialogManager.close();
+					System.out.println("Region finished: " + region);
+					worldMapPanel.setRegion(region);
+					worldMapPanel.setPreferredSize(new Dimension(933, 512));
+					worldMapPanel.repaint();
+					repaint();
+				} catch (Exception e1) {
+					e1.printStackTrace();
+				}
+			}).start();
+		});
 
 		for (File region : regions) {
 			regionListModel.addElement(region.getName());
 		}
 
 		generationPanel.add(regionList, BorderLayout.WEST);
-
 		generationPanel.add(scrollPane, BorderLayout.CENTER);
 		return generationPanel;
 	}
 
-	public JPanel createSummaryPanel(World world) {
+	/**
+	 * Create the summary panel for the world.
+	 * @param world The world to create the panel for.
+	 * @return The JPanel containing the summary panel.
+	 */
+	private JPanel createSummaryPanel(World world) {
 		ListPanel summaryPanel = new ListPanel(Globals.PREF_W - 250, Globals.BOTTOM_HEIGHT - 100, ListPanel.NO_OPTIONS,
 				0);
 
@@ -104,7 +147,12 @@ public class WorldView extends JPanel {
 		return summaryContainer;
 	}
 
-	public JPanel createGameRulesPanel(World world) {
+	/**
+	 * Create the gamerules panel for the world.
+	 * @param world The world to create the panel for.
+	 * @return The JPanel containing the gamerules panel.
+	 */
+	private JPanel createGameRulesPanel(World world) {
 		ListPanel gamerulesPanel = new ListPanel(WIDTH, Globals.BOTTOM_HEIGHT - 100, ListPanel.ALL_AZ_OPTIONS,
 				ListPanel.SORT_AZ);
 		// for every gamerule, add a label to the panel
@@ -118,6 +166,12 @@ public class WorldView extends JPanel {
 		return gamerulesContainer;
 	}
 
+	/**
+	 * Set the world to display. Basically the constructor, but it also lets you switch worlds.
+	 * @param world The world to display.
+	 * @throws IOException
+	 * @throws Exception
+	 */
 	public void setWorld(World world) throws IOException, Exception {
 
 		// reset everything

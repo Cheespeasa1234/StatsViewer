@@ -20,7 +20,7 @@ import javax.swing.UnsupportedLookAndFeelException;
 import util.DataParsing;
 import util.Globals;
 import util.Utility;
-import world.RegionParser;
+import world.Region;
 
 /**
  * The main class for the Minecraft Statistics Viewer

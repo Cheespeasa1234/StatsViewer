@@ -35,7 +35,7 @@ public class World {
 	@Expose @SerializedName("LevelName") public String name;
 
 	// Region files for chunk parsing
-	public RegionParser[] regions;
+	public Region[] regions;
 	public File[] regionFiles;
 
 	public interface LoadedEvent {
@@ -44,7 +44,7 @@ public class World {
 
 	public void setRegionFiles(File[] regionFiles, LoadedEvent onFinishedLoading) throws IOException, Exception {
 		this.regionFiles = regionFiles;
-		this.regions = new RegionParser[regionFiles.length];
+		this.regions = new Region[regionFiles.length];
 
 		try {
 			for (int i = 0; i < regionFiles.length; i++) {
@@ -65,10 +65,9 @@ public class World {
 	 * @throws Exception if there is an error parsing the file
 	 */
 	private void setRegionFile(File[] regionFiles, int i, LoadedEvent onFinishedLoading) throws IOException, Exception {
-		this.regions[i] = new RegionParser();
 
 		// start the parsing
-		regions[i].startParse(regionFiles[i]);
+		regions[i] = new Region(regionFiles[i]);
 
 		// consume the chunks
 		new Thread(() -> {
