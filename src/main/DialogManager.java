@@ -10,6 +10,7 @@ public class DialogManager {
     private static JProgressBar progressBar; // The progress bar to show
     private static int count = 0; // The current count
     private static int max = 0; // The maximum count
+    private static boolean open = false;
 
     /**
      * Function to execute a task in a separate thread
@@ -21,6 +22,8 @@ public class DialogManager {
         thread.start();
     }
 
+    public static boolean isOpen() { return open; }
+
     /**
      * Show the dialog with the given maximum value
      * Begins the progress bar movement
@@ -29,9 +32,13 @@ public class DialogManager {
      */
     public static void show(int maxVal) {
 
+        open = true;
+
         if (maxVal < 0) {
+            open = false;
             throw new IllegalArgumentException("Max value cannot be negative");
         } else if (dialog != null) {
+            open = false;
             throw new IllegalStateException("Dialog is already open");
         }
 
@@ -55,6 +62,7 @@ public class DialogManager {
                 @Override
                 public void windowClosed(WindowEvent e) {
                     dialog = null;
+                    open = false;
                 }
             });
     
@@ -89,6 +97,7 @@ public class DialogManager {
             if (dialog != null) {
                 dialog.dispose();
                 dialog = null;
+                open = false;
             }
         });
     }

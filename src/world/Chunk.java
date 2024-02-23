@@ -23,42 +23,78 @@ import util.Utility;
 
 public class Chunk {
 
-    public int x, y, z;
-    public String biome;
+	public int x, y, z;
+	public String biome;
+	public String[] biomePallete;
+	public byte[][] biomeMap;
 	public ArrayList<String> structures = new ArrayList<String>();
 
-    public String getBiome(JsonObject json) {
+	public void setBiome(JsonObject json) {
 
-        HashMap<String, Integer> biomeCount = new HashMap<String, Integer>();
+		JsonArray sections = json.getAsJsonArray("sections");
+		JsonObject section = sections.get(10).getAsJsonObject();
+		if (!section.has("biomes")) {
+			biomeMap = new byte[16][16];
+			biomePallete = new String[1];
+			System.out.println("NO BIOMES NO BIOMES NO BIOMES NO BIOMES");
+			return;
+		}
+		JsonObject biomes = section.getAsJsonObject("biomes");
+		JsonArray pallete = biomes.getAsJsonArray("palette");
 
-        JsonArray sections = json.getAsJsonArray("sections");
-        for (int i = 0; i < sections.size(); i++) {
-            int x = i % 16;
-            int z = i / 16;
-            JsonObject section = sections.get(i).getAsJsonObject();
-            JsonObject biomes = section.getAsJsonObject("biomes");
-            if (biomes == null) {
-                continue;
-            }
-            JsonArray pallete = biomes.getAsJsonArray("palette");
-            String biomeName = pallete.get(0).getAsString();
-            if (biomeCount.containsKey(biomeName)) {
-                biomeCount.put(biomeName, biomeCount.get(biomeName) + 1);
-            } else {
-                biomeCount.put(biomeName, 1);
-            }
-        }
+		// get the biome pallete
+		biomePallete = new String[pallete.size()];
+		for (int j = 0; j < pallete.size(); j++) {
+			biomePallete[j] = pallete.get(j).getAsString();
+		}
 
-        int max = 0;
-        String maxBiome = "";
-        for (String biome : biomeCount.keySet()) {
-            if (biomeCount.get(biome) > max) {
-                max = biomeCount.get(biome);
-                maxBiome = biome;
-            }
-        }
+		if (biomePallete.length == 1) {
+			System.out.println("BIOME PALLETE IS 1 LONG! SETTING TO HOMOGENEOUS");
+			biomeMap = new byte[16][16];
+			return;
+		}
 
-        return maxBiome;
+		JsonElement compressed = biomes.get("data");
+		long[] data;
+		// if it's a list, get the list
+		if (compressed.isJsonArray()) {
+			JsonArray compressedArray = compressed.getAsJsonArray();
+			data = new long[compressedArray.size()];
+			for (int i = 0; i < compressedArray.size(); i++) {
+				data[i] = compressedArray.get(i).getAsLong();
+			}
+		} else {
+			data = new long[1];
+			data[0] = compressed.getAsLong();
+		}
+
+		byte[] indices = DataParsing.splitIntegers(data, DataParsing.bitSpaceRequired(biomePallete.length));
+		if (indices.length != 64) {
+			System.out.println("BIOME MAP IS NOT 64 LONG! SETTING TO VOID");
+			biomeMap = new byte[16][16];
+			return;
+		}
+
+		// there are 64 indicies returned, map them to sections of 2x2 in a 16x16 grid
+		biomeMap = halfResolution(indices);
+
+	}
+
+	public static byte[][] halfResolution(byte[] originalArray) {
+		
+		if (originalArray.length != 64) throw new IllegalArgumentException("Array must be 64 long");
+		
+        byte[][] newArray = new byte[16][16];
+        
+		for (int i = 0; i < 64; i++) {
+			int x = i % 16;
+			int z = i / 16;
+			int x2 = x / 2;
+			int z2 = z / 2;
+			newArray[x2][z2] = originalArray[i];
+		}
+        
+        return newArray;
     }
 
 	private void addStructure(String structureName, int x, int z) {
@@ -69,17 +105,17 @@ public class Chunk {
 
 	public Chunk(byte[] regionData) throws IOException {
 		NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(regionData)).readTag(64);
-	
+
 		JsonObject json;
 		Gson gson = new Gson();
 		json = gson.fromJson(nbtTag.getTag().toString(64), JsonObject.class);
 		json = DataParsing.collapse(json).getAsJsonObject();
-	
+
 		this.x = json.get("xPos").getAsInt();
 		this.y = json.get("yPos").getAsInt();
 		this.z = json.get("zPos").getAsInt();
 
-		this.biome = getBiome(json);
+		setBiome(json);
 		JsonObject structures = json.getAsJsonObject("structures");
 
 		if (structures.has("References")) {

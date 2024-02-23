@@ -72,10 +72,8 @@ public class World {
 		// consume the chunks
 		new Thread(() -> {
 			while (!regions[i].isFinished()) {
-
 				try {
 					regions[i].consumeChunk();
-
 					// update the progress meter
 					SwingUtilities.invokeLater(() -> {
 						DialogManager.setCount(regions[i].getChunkConsumed());
@@ -83,7 +81,6 @@ public class World {
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
-				
 			}
 			DialogManager.close();
 			onFinishedLoading.onLoaded();

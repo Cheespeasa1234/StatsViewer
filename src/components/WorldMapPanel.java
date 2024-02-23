@@ -5,6 +5,8 @@ import java.awt.Font;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.Point;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.event.MouseEvent;
 import java.awt.event.MouseListener;
 import java.awt.event.MouseMotionListener;
@@ -12,9 +14,11 @@ import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
 import java.awt.geom.Point2D;
+import java.awt.image.BufferedImage;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.Timer;
 
 import com.google.gson.Gson;
 
@@ -28,11 +32,11 @@ import world.World;
  * Wrapper componenent for a Region object. Region must already be parsed.
  */
 public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionListener {
-	
-	public Region region;
+
+    public Region region;
     public boolean loaded = false;
-	private Point2D mouse = new Point2D.Double(0, 0);
-	private Color tooltipBG = new Color(0, 0, 0, 100);
+    private Point2D mouse = new Point2D.Double(0, 0);
+    private Color tooltipBG = new Color(0, 0, 0, 100);
 
     public static HashMap<String, Color> coloredBiomes = new HashMap<>() {
         {
@@ -103,113 +107,160 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
     };
 
     public WorldMapPanel() {
-		this.addMouseListener(this);
-		this.addMouseMotionListener(this);
-		this.loaded = false;
-	}
+        this.addMouseListener(this);
+        this.addMouseMotionListener(this);
+        this.loaded = false;
+        tooltipInterlopationTimer.start();
+    }
 
-	public void setRegion(Region region) {
-		this.loaded = true;
-		this.region = region;
-	}
+    private int targetTooltipWidth = 0;
+    private int targetTooltipHeight = 0;
+    private int currentTooltipWidth = 0;
+    private int currentTooltipHeight = 0;
+    private double smoothing = 0.5;
 
-	private void drawTooltip(Graphics2D g2, int x, int y, String[] lines) {
-		int maxWidth = 0;
-		for (String line : lines) {
-			int width = g2.getFontMetrics().stringWidth(line);
-			if (width > maxWidth) {
-				maxWidth = width;
-			}
-		}
-		maxWidth += 10;
+    private Timer tooltipInterlopationTimer = new Timer(50, e -> {
+        repaint();
 
-		int maxHeight = (g2.getFontMetrics().getHeight() + 5) * lines.length;
+        if (targetTooltipWidth == 0 && targetTooltipHeight == 0) {
+            return;
+        }
 
-		g2.setColor(tooltipBG);
-		g2.fillRoundRect((int) mouse.getX() + 10, (int) y + 10, maxWidth, maxHeight, 10, 10);
-		g2.setColor(Color.WHITE);
-		g2.drawRoundRect((int) mouse.getX() + 10, (int) y + 10, maxWidth, maxHeight, 10, 10);
+        if (targetTooltipWidth == currentTooltipWidth && targetTooltipHeight == currentTooltipHeight) {
+            return;
+        }
 
-		int yoff = 10;
-		for (String line : lines) {
-			g2.drawString(line, (int) mouse.getX() + 15, (int) y + 15 + yoff);
-			yoff += g2.getFontMetrics().getHeight() + 5;
-		}
+        if (targetTooltipWidth > currentTooltipWidth) {
+            currentTooltipWidth += (targetTooltipWidth - currentTooltipWidth) * smoothing;
+        } else {
+            currentTooltipWidth -= (currentTooltipWidth - targetTooltipWidth) * smoothing;
+        }
 
-	
-	}
+        if (targetTooltipHeight > currentTooltipHeight) {
+            currentTooltipHeight += (targetTooltipHeight - currentTooltipHeight) * smoothing;
+        } else {
+            currentTooltipHeight -= (currentTooltipHeight - targetTooltipHeight) * smoothing;
+        }
+
+    });
+
+    public void setRegion(Region region) {
+        this.loaded = true;
+        this.region = region;
+        rendered = render();
+    }
+
+    private void drawTooltip(Graphics2D g2, int x, int y, String[] lines) {
+        int maxWidth = 0;
+        for (String line : lines) {
+            int width = g2.getFontMetrics().stringWidth(line);
+            if (width > maxWidth) {
+                maxWidth = width;
+            }
+        }
+        maxWidth += 10;
+        int maxHeight = (g2.getFontMetrics().getHeight() + 5) * lines.length;
+        targetTooltipWidth = maxWidth;
+        targetTooltipHeight = maxHeight;
+
+        g2.setColor(tooltipBG);
+        g2.fillRoundRect((int) mouse.getX() + 10, (int) y + 10, currentTooltipWidth, currentTooltipHeight, 10, 10);
+        g2.setColor(Color.WHITE);
+        g2.drawRoundRect((int) mouse.getX() + 10, (int) y + 10, currentTooltipWidth, currentTooltipHeight, 10, 10);
+
+        int yoff = 10;
+        for (String line : lines) {
+            g2.drawString(line, (int) mouse.getX() + 15, (int) y + 15 + yoff);
+            yoff += g2.getFontMetrics().getHeight() + 5;
+        }
+
+    }
+
+    public BufferedImage render() {
+        BufferedImage img = new BufferedImage(512, 512, BufferedImage.TYPE_INT_ARGB);
+        Graphics2D g2 = img.createGraphics();
+
+        // get the region number
+        int regionx = region.x;
+        int regionz = region.z;
+        for (int i = 0; i < region.chunks.length; i++) {
+            Chunk chunk = region.chunks[i];
+
+            int drawx = chunk.x * 16 - regionx * 512;
+            int drawz = chunk.z * 16 - regionz * 512;
+            for (int x = 0; x < 16; x++) {
+                for (int z = 0; z < 16; z++) {
+                    g2.setColor(coloredBiomes.get(chunk.biomePallete[chunk.biomeMap[x][z]]));
+                    g2.fillRect(drawx + x, drawz + z, 1, 1);
+                }
+            }
+
+            // DEBUG STUFF
+            // g2.setColor(Color.BLACK);
+            // g2.drawString(chunk.x + "", drawx + 5, drawz + 5);
+            // g2.drawString(chunk.z + "", drawx + 5, drawz + 10);
+
+            // draw the structure
+            if (chunk.structures != null && chunk.structures.size() > 0) {
+                int count = chunk.structures.size();
+                int reservedSpace = 16 / count;
+                for (int j = 0; j < count; j++) {
+                    g2.setColor(Color.BLACK);
+                    g2.fillOval(drawx + (j * reservedSpace), drawz + (j * reservedSpace), reservedSpace,
+                            reservedSpace);
+                }
+            }
+        }
+
+        return img;
+    }
+
+    BufferedImage rendered;
 
     @Override public void paintComponent(Graphics g) {
         super.paintComponent(g);
         Graphics2D g2 = (Graphics2D) g;
 
-		if (!loaded) {
-			g2.drawString("Not loaded.", 10, 10);
-			return;
-		}
+        if (!loaded) {
+            g2.drawString("Not loaded.", 10, 10);
+        } else {
+            g2.drawImage(rendered, 0, 0, null);
+            int chunkx = (int) Math.floor(mouse.getX() / 16);
+            int chunkz = (int) Math.floor(mouse.getY() / 16);
+            Chunk chunk = region.chunks[chunkx + chunkz * 32];
 
-		// get the region number
-		int regionx = region.x;
-		int regionz = region.z;
-        for (int i = 0; i < region.chunks.length; i++) {
-            Chunk chunk = region.chunks[i];
-            String biome = chunk.biome;
-            g2.setColor(coloredBiomes.get(biome));
-            int drawx = chunk.x * 16 - regionx * 512;
-            int drawz = chunk.z * 16 - regionz * 512;
-            g2.fillRect(drawx, drawz, 16, 16);
+            // get the block out of 16x16 mouse is on
+            int blockx = (int) Math.floor((mouse.getX() - chunkx * 16) / 16 * 16);
+            int blockz = (int) Math.floor((mouse.getY() - chunkz * 16) / 16 * 16);
 
-			// DEBUG STUFF
-			// g2.setColor(Color.BLACK);
-			// g2.drawString(chunk.x + "", drawx + 5, drawz + 5);
-			// g2.drawString(chunk.z + "", drawx + 5, drawz + 10);
+            String biome = chunk.biomePallete[chunk.biomeMap[blockx][blockz]];
 
-			// draw the structure
-			if (chunk.structures != null && chunk.structures.size() > 0) {
-				int count = chunk.structures.size();
-				int reservedSpace = 16 / count;
-				for (int j = 0; j < count; j++) {
-					g2.setColor(Color.BLACK);
-					g2.fillOval(drawx + (j * reservedSpace), drawz + (j * reservedSpace), reservedSpace, reservedSpace);
-				}
-			}
+            String[] tooltip = new String[2 + chunk.structures.size()];
+            tooltip[0] = "Biome: " + biome;
+            tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
+            for (int i = 0; i < chunk.structures.size(); i++) {
+                tooltip[i + 2] = chunk.structures.get(i);
+            }
+
+            drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
         }
-    
-		int chunkx = (int) Math.floor(mouse.getX() / 16);
-		int chunkz = (int) Math.floor(mouse.getY() / 16);
-		Chunk chunk = region.chunks[chunkx + chunkz * 32];
 
-		String[] tooltip = new String[2 + chunk.structures.size()];
-		tooltip[0] = "Biome: " + chunk.biome;
-		tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
-		for (int i = 0; i < chunk.structures.size(); i++) {
-			tooltip[i + 2] = chunk.structures.get(i);
-		}
+    }
 
-		drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
-		
-	}
+    @Override public void mouseMoved(MouseEvent e) {
+        mouse = e.getPoint();
+        repaint();
+    }
 
-	@Override public void mouseMoved(MouseEvent e) {
-		mouse = e.getPoint();
-		repaint();
-	}
+    @Override public void mouseDragged(MouseEvent e) {}
 
-	@Override public void mouseDragged(MouseEvent e) {
-	}
+    @Override public void mouseClicked(MouseEvent e) {}
 
-	@Override public void mouseClicked(MouseEvent e) {
-	}
+    @Override public void mousePressed(MouseEvent e) {}
 
-	@Override public void mousePressed(MouseEvent e) {
-	}
+    @Override public void mouseReleased(MouseEvent e) {}
 
-	@Override public void mouseReleased(MouseEvent e) {
-	}
+    @Override public void mouseEntered(MouseEvent e) {}
 
-	@Override public void mouseEntered(MouseEvent e) {
-	}
-
-	@Override public void mouseExited(MouseEvent e) {
-	}
+    @Override public void mouseExited(MouseEvent e) {}
 }

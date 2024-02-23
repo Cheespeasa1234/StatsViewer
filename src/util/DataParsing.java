@@ -202,4 +202,62 @@ public class DataParsing {
         }
     }
 
+    /**
+     * Returns the number of bits required to represent the given number.
+     * 
+     * @param num The number to represent
+     * @return The number of bits required to represent the number
+     */
+    public static int bitSpaceRequired(int num) {
+        if (num == 0) {
+            return 1;
+        }
+        int numBits = 0;
+        while (num != 0) {
+            numBits++;
+            num >>>= 1; // Unsigned right shift, discards the leftmost bit (fills with 0)
+        }
+        return numBits;
+    }
+
+
+    /**
+     * Splits a list of signed integers into 64 indices of bit size provided.
+     * For example, splitIntegers([-1729127166320252928L], 3) returns [1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
+     * This is used for splitting compressed data into indices that access a pallete.
+     * 
+     * @param integers The compressed data, typically 1-2 integers.
+     * @param size The size of the bit indices to split the integers into.
+     * @return A list of integers, each representing an index.
+    */
+    public static byte[] splitIntegers(long[] integers, int size) {
+        List<Byte> result = new ArrayList<>();
+
+        long concatNum = 0;
+        int concatBits = 0;
+
+        for (long num : integers) {
+            // Masking to ignore the sign bit
+            concatNum = (concatNum << 64) | (num & 0x7FFFFFFFFFFFFFFFL);
+            concatBits += 64;
+
+            while (concatBits >= size) {
+                concatBits -= size;
+                result.add((byte) (concatNum >> concatBits));
+                concatNum &= (1L << concatBits) - 1;
+            }
+        }
+
+        if (concatBits > 0) {
+            concatNum <<= (size - concatBits);
+            result.add((byte) concatNum);
+        }
+
+        byte[] resultArray = new byte[result.size()];
+        for (int i = 0; i < result.size(); i++) {
+            resultArray[i] = result.get(i);
+        }
+        return resultArray;
+    }
+
 }
