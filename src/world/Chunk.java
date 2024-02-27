@@ -1,13 +1,8 @@
 package world;
 
-import java.io.BufferedWriter;
 import java.io.ByteArrayInputStream;
-import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.Random;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
@@ -17,9 +12,6 @@ import com.google.gson.JsonObject;
 import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.io.NBTInputStream;
 import util.DataParsing;
-import world.Region.Locator;
-
-import util.Utility;
 
 public class Chunk {
 
@@ -32,71 +24,12 @@ public class Chunk {
 	public void setBiome(JsonObject json) {
 
 		JsonArray sections = json.getAsJsonArray("sections");
-		JsonObject section = sections.get(10).getAsJsonObject();
-		if (!section.has("biomes")) {
-			biomeMap = new byte[16][16];
-			biomePallete = new String[1];
-			System.out.println("NO BIOMES NO BIOMES NO BIOMES NO BIOMES");
-			return;
-		}
-		JsonObject biomes = section.getAsJsonObject("biomes");
-		JsonArray pallete = biomes.getAsJsonArray("palette");
+		JsonElement topSection = sections.get(sections.size() - 1);
+		JsonElement biomeData = topSection.get("biomes").getAsJsonObject("biomes");
 
-		// get the biome pallete
-		biomePallete = new String[pallete.size()];
-		for (int j = 0; j < pallete.size(); j++) {
-			biomePallete[j] = pallete.get(j).getAsString();
-		}
 
-		if (biomePallete.length == 1) {
-			System.out.println("BIOME PALLETE IS 1 LONG! SETTING TO HOMOGENEOUS");
-			biomeMap = new byte[16][16];
-			return;
-		}
-
-		JsonElement compressed = biomes.get("data");
-		long[] data;
-		// if it's a list, get the list
-		if (compressed.isJsonArray()) {
-			JsonArray compressedArray = compressed.getAsJsonArray();
-			data = new long[compressedArray.size()];
-			for (int i = 0; i < compressedArray.size(); i++) {
-				data[i] = compressedArray.get(i).getAsLong();
-			}
-		} else {
-			data = new long[1];
-			data[0] = compressed.getAsLong();
-		}
-
-		byte[] indices = DataParsing.splitIntegers(data, DataParsing.bitSpaceRequired(biomePallete.length));
-		if (indices.length != 64) {
-			System.out.println("BIOME MAP IS NOT 64 LONG! SETTING TO VOID");
-			biomeMap = new byte[16][16];
-			return;
-		}
-
-		// there are 64 indicies returned, map them to sections of 2x2 in a 16x16 grid
-		biomeMap = halfResolution(indices);
-
+		
 	}
-
-	public static byte[][] halfResolution(byte[] originalArray) {
-		
-		if (originalArray.length != 64) throw new IllegalArgumentException("Array must be 64 long");
-		
-        byte[][] newArray = new byte[16][16];
-        
-		for (int i = 0; i < 64; i++) {
-			int x = i % 16;
-			int z = i / 16;
-			int x2 = x / 2;
-			int z2 = z / 2;
-			newArray[x2][z2] = originalArray[i];
-		}
-        
-        return newArray;
-    }
-
 	private void addStructure(String structureName, int x, int z) {
 		if (x == this.x && z == this.z) {
 			structures.add(structureName);

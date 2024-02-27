@@ -225,6 +225,12 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             g2.drawString("Not loaded.", 10, 10);
         } else {
             g2.drawImage(rendered, 0, 0, null);
+
+            // make sure the mouse is within the map area
+            if (mouse.getX() < 0 || mouse.getY() < 0 || mouse.getX() > 512 || mouse.getY() > 512) {
+                return;
+            }
+
             int chunkx = (int) Math.floor(mouse.getX() / 16);
             int chunkz = (int) Math.floor(mouse.getY() / 16);
             Chunk chunk = region.chunks[chunkx + chunkz * 32];
