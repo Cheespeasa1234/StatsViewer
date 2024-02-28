@@ -202,4 +202,64 @@ public class DataParsing {
         }
     }
 
+    /**
+     * Returns the number of bits required to represent the given number.
+     * 
+     * @param num The number to represent
+     * @return The number of bits required to represent the number
+     */
+    public static int bitSpaceRequired(int num) {
+        if (num == 0) {
+            return 1;
+        }
+        int numBits = 0;
+        while (num != 0) {
+            numBits++;
+            num >>>= 1; // Unsigned right shift, discards the leftmost bit (fills with 0)
+        }
+        return numBits;
+    }
+
+
+    /**
+     * Splits a list of signed integers into 64 indices of bit size provided.
+     * For example, splitIntegers([-1729127166320252928L], 3) returns [1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
+     * This is used for splitting compressed data into indices that access a pallete.
+     * 
+     * @param array The compressed data, typically 1-2 integers.
+     * @param n The size of the bit indices to split the integers into.
+     * @return A list of integers, each representing an index.
+    */
+    public static byte[] splitIntegers(long[] array, int n) {
+        // Join binary data with each number being 64 bits
+        StringBuilder binaryString = new StringBuilder();
+        for (long num : array) {
+            // Convert number to 64-bit binary representation
+            String binaryNum = Long.toBinaryString(num);
+            // Pad with leading zeros if necessary
+            while (binaryNum.length() < 64) {
+                binaryNum = "0" + binaryNum;
+            }
+            binaryString.append(binaryNum);
+        }
+
+        // Split binary data into chunks of size n and reverse each chunk
+        List<String> binaryChunks = new ArrayList<>();
+        for (int i = 0; i < binaryString.length(); i += n) {
+            String chunk = binaryString.substring(i, Math.min(i + n, binaryString.length()));
+            // Reverse the chunk
+            StringBuilder reversedChunk = new StringBuilder(chunk).reverse();
+            binaryChunks.add(reversedChunk.toString());
+        }
+
+        // Convert binary chunks to numbers and store them in byte array
+        byte[] result = new byte[binaryChunks.size()];
+        for (int i = 0; i < binaryChunks.size(); i++) {
+            String binaryChunk = binaryChunks.get(i);
+            result[i] = (byte) Integer.parseInt(binaryChunk, 2);
+        }
+
+        return result;
+    }
+
 }

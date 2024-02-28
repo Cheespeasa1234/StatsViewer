@@ -77,6 +77,11 @@ public class WorldView extends JPanel {
 				return;
 			}
 			
+			// if something is also being loaded
+			if (DialogManager.isOpen()) {
+				return;
+			}
+
 			// get the selected region
 			int idx = lsm.getMinSelectionIndex();
 			String regionName = regionListModel.getElementAt(idx);

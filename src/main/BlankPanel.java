@@ -83,6 +83,13 @@ public class BlankPanel extends JPanel {
         });
         this.prevButton.addActionListener(e -> {
             String[] recentDirectories = Utility.readRecentDirectories().toArray(new String[0]);
+            
+            // if there are no recent directories, do not show them
+            if (recentDirectories.length == 0) {
+                JOptionPane.showMessageDialog(null, "No previous servers to open.");
+                return;
+            }
+
             String chosen = (String) JOptionPane.showInputDialog(
                     this,
                     "Select a recent directory",

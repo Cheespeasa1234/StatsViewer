@@ -176,6 +176,7 @@ public class StatsViewer extends JPanel implements KeyListener {
         this.setBackground(Color.WHITE);
         this.addKeyListener(this);
 
+        // Set the look and feel
         try {
             if (System.getProperty("os.name").startsWith("Windows")) {
                 UIManager.setLookAndFeel("com.sun.java.swing.plaf.windows.WindowsLookAndFeel");
@@ -186,6 +187,17 @@ public class StatsViewer extends JPanel implements KeyListener {
                 | UnsupportedLookAndFeelException e) {
             e.printStackTrace();
             System.exit(-1);
+        }
+
+        // Set the recents file
+        File recentsFile = new File(Globals.RECENTS_FILE_DIRECTORY);
+        if (!recentsFile.exists()) {
+            try {
+                recentsFile.createNewFile();
+            } catch (IOException e) {
+                System.out.println("Failed to open recents file.");
+                e.printStackTrace();
+            }
         }
 
         createPages();
