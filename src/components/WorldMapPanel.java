@@ -187,6 +187,14 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
         for (int i = 0; i < region.chunks.length; i++) {
             Chunk chunk = region.chunks[i];
 
+            if (chunk == null) {
+                g2.setColor(Color.RED);
+                int x = i % 32;
+                int z = i / 32;
+                g2.fillRect(x * 16, z * 16, 16, 16);
+                continue;
+            }
+
             int drawx = chunk.x * 16 - regionx * 512;
             int drawz = chunk.z * 16 - regionz * 512;
             for (int z = 0; z < 16; z++) { // Swap x and z in the loop
@@ -248,20 +256,31 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             int chunkz = (int) Math.floor(mouse.getY() / 16);
             Chunk chunk = region.chunks[chunkx + chunkz * 32];
 
-            // get the block out of 16x16 mouse is on
-            int blockx = (int) Math.floor((mouse.getX() - chunkx * 16) / 16 * 16);
-            int blockz = (int) Math.floor((mouse.getY() - chunkz * 16) / 16 * 16);
+            if (chunk == null) {
 
-            String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]];
+                // it is ungenerated
+                String[] tooltip = new String[] { "Chunk not generated." };
+                drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
 
-            String[] tooltip = new String[2 + chunk.structures.size()];
-            tooltip[0] = "Biome: " + biome;
-            tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
-            for (int i = 0; i < chunk.structures.size(); i++) {
-                tooltip[i + 2] = chunk.structures.get(i);
+
+            } else {
+
+                // get the block out of 16x16 mouse is on
+                int blockx = (int) Math.floor((mouse.getX() - chunkx * 16) / 16 * 16);
+                int blockz = (int) Math.floor((mouse.getY() - chunkz * 16) / 16 * 16);
+
+                String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]];
+
+                String[] tooltip = new String[2 + chunk.structures.size()];
+                tooltip[0] = "Biome: " + biome;
+                tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
+                for (int i = 0; i < chunk.structures.size(); i++) {
+                    tooltip[i + 2] = chunk.structures.get(i);
+                }
+
+                drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
+
             }
-
-            drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
         }
 
     }
