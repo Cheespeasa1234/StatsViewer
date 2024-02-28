@@ -1,9 +1,9 @@
 package components;
 
+import java.awt.BorderLayout;
 import java.awt.Dimension;
 import java.io.File;
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Map;
 
 import javax.swing.DefaultListModel;
@@ -16,9 +16,6 @@ import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
 
 import main.DialogManager;
-
-import java.awt.BorderLayout;
-
 import util.Globals;
 import world.Region;
 import world.World;
@@ -31,7 +28,6 @@ public class WorldView extends JPanel {
 
 	private JLabel status;
 	private JTabbedPane tabs;
-	private World world;
 	private WorldMapPanel worldMapPanel;
 
 	private static final int WIDTH = Globals.PREF_W - 250;
@@ -180,7 +176,6 @@ public class WorldView extends JPanel {
 	public void setWorld(World world) throws IOException, Exception {
 
 		// reset everything
-		this.world = world;
 		tabs.removeAll();
 
 		tabs.addTab("Summary", createSummaryPanel(world));

@@ -1,32 +1,41 @@
 package world;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.zip.DataFormatException;
-import java.util.zip.Inflater;
-
-import javax.swing.JDialog;
-import javax.swing.JProgressBar;
-import javax.swing.SwingUtilities;
 
 import main.DialogManager;
 import util.DataParsing;
 
+/**
+ * Represents a region in the world.
+ * Contains the region's position, chunks, and locators.
+ * Parses region file chunk by chunk. Region owner is responsible for updating the progress bar, and
+ * checking if the file is finished.
+ *
+ * @see Region#isFinished()
+ * @see Region#consumeChunk()
+ * @see Chunk
+ * @see World
+ * @author Nate Levison
+ */
 public class Region {
 
     private static final int SECTOR_SIZE = 4096;
     private static final int CHUNK_COUNT = 1024;
 
-	public int x, z;
+    public int x, z;
 
     public Chunk[] chunks = new Chunk[CHUNK_COUNT];
-    public Locator[] locators = new Locator[CHUNK_COUNT];
-    public byte[] header = new byte[SECTOR_SIZE];
+    private Locator[] locators = new Locator[CHUNK_COUNT];
+    private byte[] header = new byte[SECTOR_SIZE];
 
-    public static class Locator {
+    /**
+     * Represents a chunk locator in the region file.
+     * Contains the offset and size of the chunk.
+     */
+    private static class Locator {
+
         public byte offx4, offx2, offx1, sectorCount;
 
         public Locator(byte offx4, byte offx2, byte offx1, byte sectorCount) {
@@ -90,19 +99,21 @@ public class Region {
         byte[] data = new byte[locators[chunkConsumed].sizeBytes()];
         fis.read(data);
 
-		if (metadata[0] == 0x00 && metadata[1] == 0x00 && metadata[2] == 0x00 && metadata[3] == 0x00 && metadata[4] == 0x00) {
-			chunks[chunkConsumed] = null;
-		} else {
-			byte compression = metadata[4];
-			if (compression == 0x00) {
-				System.err.println("Invalid compression type: " + String.format("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X", metadata[0], metadata[1], metadata[2], metadata[3], metadata[4], compression));
-			} else if (compression != 0x02) {
-				System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
-			} else {
-				byte[] decompressed = DataParsing.decompressZlib(data);
-				chunks[chunkConsumed] = new Chunk(decompressed);
-			}
-		}
+        if (metadata[0] == 0x00 && metadata[1] == 0x00 && metadata[2] == 0x00 && metadata[3] == 0x00
+                && metadata[4] == 0x00) {
+            chunks[chunkConsumed] = null;
+        } else {
+            byte compression = metadata[4];
+            if (compression == 0x00) {
+                System.err.println("Invalid compression type: " + String.format("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X",
+                        metadata[0], metadata[1], metadata[2], metadata[3], metadata[4], compression));
+            } else if (compression != 0x02) {
+                System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
+            } else {
+                byte[] decompressed = DataParsing.decompressZlib(data);
+                chunks[chunkConsumed] = new Chunk(decompressed);
+            }
+        }
 
         fis.close();
         chunkConsumed++;
@@ -119,11 +130,11 @@ public class Region {
         // Open the file
         fileConsumed = file;
         FileInputStream fis = new FileInputStream(file.getAbsolutePath());
-		String[] split = file.getName().split("\\.");
-		int regionx = Integer.parseInt(split[1]);
-		int regionz = Integer.parseInt(split[2]);
-		this.x = regionx;
-		this.z = regionz;
+        String[] split = file.getName().split("\\.");
+        int regionx = Integer.parseInt(split[1]);
+        int regionz = Integer.parseInt(split[2]);
+        this.x = regionx;
+        this.z = regionz;
         DialogManager.show(1024);
 
         // Read the locators, skip timestamps

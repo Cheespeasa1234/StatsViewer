@@ -1,10 +1,6 @@
 package components;
 
-import util.Globals;
-import world.World;
-
 import java.awt.Dimension;
-import java.io.IOException;
 import java.util.ArrayList;
 
 import javax.swing.DefaultListModel;
@@ -12,6 +8,9 @@ import javax.swing.JList;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.ListSelectionModel;
+
+import util.Globals;
+import world.World;
 
 public class BottomPanelWorlds extends JPanel {
 
@@ -38,10 +37,10 @@ public class BottomPanelWorlds extends JPanel {
             }
             int idx = lsm.getMinSelectionIndex();
             try {
-				worldView.setWorld(worlds.get(idx));
-			} catch (Exception e1) {
-				e1.printStackTrace();
-			}
+                worldView.setWorld(worlds.get(idx));
+            } catch (Exception e1) {
+                e1.printStackTrace();
+            }
         });
 
         scrollPane = new JScrollPane(itemList);

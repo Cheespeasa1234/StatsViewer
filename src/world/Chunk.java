@@ -4,29 +4,37 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 
-import javax.xml.crypto.Data;
-
 import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
-import net.querz.nbt.io.NamedTag;
 import net.querz.nbt.io.NBTInputStream;
+import net.querz.nbt.io.NamedTag;
 import util.DataParsing;
 
+/**
+ * Represents a chunk in the world.
+ * Contains the chunk's position, biome map, and structures.
+ * 
+ * @see Region
+ * @see World
+ * @author Nate Levison
+ */
 public class Chunk {
 
 	public int x, y, z;
-	public String biome;
 	public String[] biomePallete;
 	public byte[][][] biomeMap;
 	public ArrayList<String> structures = new ArrayList<String>();
 
 	/**
-	 * Sets the biomePallete and biomeMap
+	 * Sets the biomePallete and biomeMap during loading.
+	 * Responsible for all pallete splitting and sets the state of biomePallete, and biomeMap.
+	 * 
+	 * @param json the top-level json object of the chunk
 	 */
-	public void setBiome(JsonObject json) {
+	private void setBiome(JsonObject json) {
 
 		biomeMap = new byte[16][16][16];
 
@@ -71,31 +79,45 @@ public class Chunk {
 		byte[] indices = DataParsing.splitIntegers(rawDataList, bitSpace);
 
 		// there are 64 indexes, they must be evenly distributed to a 16x16x16 grid
-		// so, each index covers 4x4x4 blocks
-		// load each index into the biome map, letting it take up 64 blocks each
-		// Iterate through 3D array
-        // Calculate the number of elements each index should cover
-        int elementsPerIndex = (16 * 16 * 16) / indices.length;
+		int elementsPerIndex = (16 * 16 * 16) / indices.length;
 
-        // Assign indices to biomeMap
-        int index = 0;
-        for (int i = 0; i < 16; i++) {
-            for (int j = 0; j < 16; j++) {
-                for (int k = 0; k < 16; k++) {
-                    biomeMap[i][j][k] = indices[index / elementsPerIndex];
-                    index++;
-                }
-            }
-        }
+		// Assign indices to biomeMap
+		int index = 0;
+		for (int i = 0; i < 16; i++) {
+			for (int j = 0; j < 16; j++) {
+				for (int k = 0; k < 16; k++) {
+					biomeMap[i][j][k] = indices[index / elementsPerIndex];
+					index++;
+				}
+			}
+		}
 
 	}
 
+	/**
+	 * Adds a structure segment to the list of structures if it is in the chunk.
+	 * If so, it is identified as the structure origin and is added.
+	 * 
+	 * @param structureName the resource name of the structure
+	 * @param x the chunk x of the structure segment
+	 * @param z the chunk z of the structure segment
+	 */
 	private void addStructure(String structureName, int x, int z) {
 		if (x == this.x && z == this.z) {
 			structures.add(structureName);
 		}
 	}
 
+	/**
+	 * Creates a chunk from decompressed NBT data.
+	 * The decompressed data must not have any headers either.
+	 * The top-level tag is read, and must contain the xPos, yPos, zPos, and structures.
+	 * This chunk will be null if it has not been generated in the region.
+	 * Throws an IOException either if it can not parse the bytes as NBT.
+	 * 
+	 * @param regionData the region data
+	 * @throws IOException if there is an error converting the data
+	 */
 	public Chunk(byte[] regionData) throws IOException {
 		NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(regionData)).readTag(64);
 
@@ -108,7 +130,7 @@ public class Chunk {
 		this.y = json.get("yPos").getAsInt();
 		this.z = json.get("zPos").getAsInt();
 
-		setBiome(json);
+		this.setBiome(json);
 		JsonObject structures = json.getAsJsonObject("structures");
 
 		if (structures.has("References")) {
@@ -122,13 +144,13 @@ public class Chunk {
 						long position = positions.get(i).getAsLong();
 						int first32 = (int) (position >> 32);
 						int last32 = (int) (position & 0xFFFFFFFF);
-						addStructure(key, first32, last32);
+						this.addStructure(key, first32, last32);
 					}
 				} else {
 					long position = pos.getAsLong();
 					int first32 = (int) (position >> 32);
 					int last32 = (int) (position & 0xFFFFFFFF);
-					addStructure(key, first32, last32);
+					this.addStructure(key, first32, last32);
 				}
 			}
 
