@@ -13,6 +13,7 @@ import java.awt.event.MouseMotionListener;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.awt.geom.AffineTransform;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
 
@@ -188,13 +189,15 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
 
             int drawx = chunk.x * 16 - regionx * 512;
             int drawz = chunk.z * 16 - regionz * 512;
-            for (int x = 0; x < 16; x++) {
-                for (int z = 0; z < 16; z++) {
-                    g2.setColor(coloredBiomes.get(chunk.biomePallete[chunk.biomeMap[x][z]]));
-                    g2.fillRect(drawx + x, drawz + z, 1, 1);
+            for (int z = 0; z < 16; z++) { // Swap x and z in the loop
+                for (int x = 0; x < 16; x++) { // Swap x and z in the loop
+                    g2.setColor(coloredBiomes.get(chunk.biomePallete[chunk.biomeMap[x / 4][z][0]]));
+                    g2.fillRect(drawx + (15 - z), drawz + (15 - x), 1, 1); // Adjust coordinates for rotation
                 }
             }
 
+            drawx = chunk.x * 16 - regionx * 512;
+            drawz = chunk.z * 16 - regionz * 512;
             // DEBUG STUFF
             // g2.setColor(Color.BLACK);
             // g2.drawString(chunk.x + "", drawx + 5, drawz + 5);
@@ -211,6 +214,16 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 }
             }
         }
+
+        // draw lines between the chunks
+        // for (int x = 0; x < 512; x += 16) {
+        //     g2.setColor(Color.BLACK);
+        //     g2.drawLine(x, 0, x, 512);
+        // }
+        // for (int z = 0; z < 512; z += 16) {
+        //     g2.setColor(Color.BLACK);
+        //     g2.drawLine(0, z, 512, z);
+        // }
 
         return img;
     }
@@ -239,7 +252,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             int blockx = (int) Math.floor((mouse.getX() - chunkx * 16) / 16 * 16);
             int blockz = (int) Math.floor((mouse.getY() - chunkz * 16) / 16 * 16);
 
-            String biome = chunk.biomePallete[chunk.biomeMap[blockx][blockz]];
+            String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]];
 
             String[] tooltip = new String[2 + chunk.structures.size()];
             tooltip[0] = "Biome: " + biome;

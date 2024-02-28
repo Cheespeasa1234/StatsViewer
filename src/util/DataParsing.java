@@ -226,38 +226,40 @@ public class DataParsing {
      * For example, splitIntegers([-1729127166320252928L], 3) returns [1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0]
      * This is used for splitting compressed data into indices that access a pallete.
      * 
-     * @param integers The compressed data, typically 1-2 integers.
-     * @param size The size of the bit indices to split the integers into.
+     * @param array The compressed data, typically 1-2 integers.
+     * @param n The size of the bit indices to split the integers into.
      * @return A list of integers, each representing an index.
     */
-    public static byte[] splitIntegers(long[] integers, int size) {
-        List<Byte> result = new ArrayList<>();
-
-        long concatNum = 0;
-        int concatBits = 0;
-
-        for (long num : integers) {
-            // Masking to ignore the sign bit
-            concatNum = (concatNum << 64) | (num & 0x7FFFFFFFFFFFFFFFL);
-            concatBits += 64;
-
-            while (concatBits >= size) {
-                concatBits -= size;
-                result.add((byte) (concatNum >> concatBits));
-                concatNum &= (1L << concatBits) - 1;
+    public static byte[] splitIntegers(long[] array, int n) {
+        // Join binary data with each number being 64 bits
+        StringBuilder binaryString = new StringBuilder();
+        for (long num : array) {
+            // Convert number to 64-bit binary representation
+            String binaryNum = Long.toBinaryString(num);
+            // Pad with leading zeros if necessary
+            while (binaryNum.length() < 64) {
+                binaryNum = "0" + binaryNum;
             }
+            binaryString.append(binaryNum);
         }
 
-        if (concatBits > 0) {
-            concatNum <<= (size - concatBits);
-            result.add((byte) concatNum);
+        // Split binary data into chunks of size n and reverse each chunk
+        List<String> binaryChunks = new ArrayList<>();
+        for (int i = 0; i < binaryString.length(); i += n) {
+            String chunk = binaryString.substring(i, Math.min(i + n, binaryString.length()));
+            // Reverse the chunk
+            StringBuilder reversedChunk = new StringBuilder(chunk).reverse();
+            binaryChunks.add(reversedChunk.toString());
         }
 
-        byte[] resultArray = new byte[result.size()];
-        for (int i = 0; i < result.size(); i++) {
-            resultArray[i] = result.get(i);
+        // Convert binary chunks to numbers and store them in byte array
+        byte[] result = new byte[binaryChunks.size()];
+        for (int i = 0; i < binaryChunks.size(); i++) {
+            String binaryChunk = binaryChunks.get(i);
+            result[i] = (byte) Integer.parseInt(binaryChunk, 2);
         }
-        return resultArray;
+
+        return result;
     }
 
 }
