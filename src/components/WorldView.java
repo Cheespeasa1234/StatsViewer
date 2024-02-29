@@ -2,8 +2,10 @@ package components;
 
 import java.awt.BorderLayout;
 import java.awt.Dimension;
+import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.Map;
 
 import javax.swing.DefaultListModel;
@@ -29,6 +31,7 @@ public class WorldView extends JPanel {
 	private JLabel status;
 	private JTabbedPane tabs;
 	private WorldMapPanel worldMapPanel;
+	private HashMap<String, Region> regions;
 
 	private static final int WIDTH = Globals.PREF_W - 250;
 
@@ -37,6 +40,7 @@ public class WorldView extends JPanel {
 	 * @see #setWorld(World)
 	 */
 	public WorldView() {
+		regions = new HashMap<String, Region>();
 		status = new JLabel("No world selected.");
 		tabs = new JTabbedPane();
 		this.add(status);
@@ -57,7 +61,7 @@ public class WorldView extends JPanel {
 		JPanel generationPanel = new JPanel(new BorderLayout());
 
 		// Create the fancy map display, and the list of regions
-		File[] regions = world.regionFiles;
+		File[] regionFiles = world.regionFiles;
 		worldMapPanel = new WorldMapPanel();
 		worldMapPanel.setPreferredSize(new Dimension(933, 512));
 		JScrollPane scrollPane = new JScrollPane(worldMapPanel);
@@ -72,7 +76,7 @@ public class WorldView extends JPanel {
 			if (lsm.isSelectionEmpty() || lsm.getValueIsAdjusting()) {
 				return;
 			}
-			
+
 			// if something is also being loaded
 			if (DialogManager.isOpen()) {
 				return;
@@ -82,29 +86,44 @@ public class WorldView extends JPanel {
 			int idx = lsm.getMinSelectionIndex();
 			String regionName = regionListModel.getElementAt(idx);
 
-			new Thread(() -> {
-				try {
-					// set the world map panel to the selected region
-					Region region = new Region(new File(Globals.SERVER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME + "/region/" + regionName));
-					while (!region.isFinished()) {
-						region.consumeChunk();
-						SwingUtilities.invokeLater(() -> {
-							DialogManager.setCount(region.getChunkConsumed());
-						});
+			// If this region has already been parsed
+			if (regions.containsKey(regionName)) {
+				Region region = regions.get(regionName);
+				worldMapPanel.setRegion(region);
+				worldMapPanel.repaint();
+			
+			// It has not been parsed, so do that
+			} else {
+				new Thread(() -> {
+					try {
+
+						// Parse and set a new region
+						Region region = new Region(new File(
+								Globals.SERVER_DIRECTORY + "/" + Globals.OPEN_WORLD_NAME + "/region/" + regionName));
+						while (!region.isFinished()) {
+							region.consumeChunk();
+							SwingUtilities.invokeLater(() -> {
+								DialogManager.setCount(region.getChunkConsumed());
+							});
+						}
+						regions.put(regionName, region);
+
+						DialogManager.close();
+						System.out.println("Region finished: " + region);
+
+						// Set the panel to display it
+						worldMapPanel.setRegion(region);
+						worldMapPanel.repaint();
+
+						repaint();
+					} catch (Exception e1) {
+						e1.printStackTrace();
 					}
-					DialogManager.close();
-					System.out.println("Region finished: " + region);
-					worldMapPanel.setRegion(region);
-					worldMapPanel.setPreferredSize(new Dimension(933, 512));
-					worldMapPanel.repaint();
-					repaint();
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-			}).start();
+				}).start();
+			}
 		});
 
-		for (File region : regions) {
+		for (File region : regionFiles) {
 			regionListModel.addElement(region.getName());
 		}
 

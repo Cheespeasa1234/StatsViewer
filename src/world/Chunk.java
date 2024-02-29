@@ -119,11 +119,14 @@ public class Chunk {
 	 * @throws IOException if there is an error converting the data
 	 */
 	public Chunk(byte[] regionData) throws IOException {
-		NamedTag nbtTag = new NBTInputStream(new ByteArrayInputStream(regionData)).readTag(64);
+		String nbtTag = new NBTInputStream(new ByteArrayInputStream(regionData))
+			.readTag(64)
+			.getTag()
+			.toString(64);
 
 		JsonObject json;
 		Gson gson = new Gson();
-		json = gson.fromJson(nbtTag.getTag().toString(64), JsonObject.class);
+		json = gson.fromJson(nbtTag, JsonObject.class);
 		json = DataParsing.collapse(json).getAsJsonObject();
 
 		this.x = json.get("xPos").getAsInt();
@@ -144,18 +147,16 @@ public class Chunk {
 						long position = positions.get(i).getAsLong();
 						int first32 = (int) (position >> 32);
 						int last32 = (int) (position & 0xFFFFFFFF);
-						this.addStructure(key, first32, last32);
+						this.addStructure(key, last32, first32);
 					}
 				} else {
 					long position = pos.getAsLong();
 					int first32 = (int) (position >> 32);
 					int last32 = (int) (position & 0xFFFFFFFF);
-					this.addStructure(key, first32, last32);
+					this.addStructure(key, last32, first32);
 				}
 			}
 
-		} else {
-			System.out.println("No references");
 		}
 	}
 }

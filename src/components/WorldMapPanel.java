@@ -1,6 +1,7 @@
 package components;
 
 import java.awt.Color;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.MouseEvent;
@@ -22,76 +23,81 @@ import world.Region;
 public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionListener {
 
     private Region region;
-    private boolean loaded = false;
     private Point2D mouse = new Point2D.Double(0, 0);
     private Color tooltipBG = new Color(0, 0, 0, 100);
+    public BufferedImage rendered;
+    public boolean loaded = false;
+
+    public boolean mapRendered() {
+        return rendered != null;
+    }
 
     // Map of biomes to colors
     private static HashMap<String, Color> coloredBiomes = new HashMap<>() {
         {
-            put("minecraft:badlands", Color.decode("#FF6D00"));
-            put("minecraft:bamboo_jungle", Color.decode("#7E9A45"));
-            put("minecraft:basalt_deltas", Color.decode("#2A2829"));
-            put("minecraft:beach", Color.decode("#FADE55"));
-            put("minecraft:birch_forest", Color.decode("#506D3A"));
-            put("minecraft:cherry_grove", Color.decode("#E965BE"));
-            put("minecraft:crimson_forest", Color.decode("#970000"));
-            put("minecraft:dark_forest", Color.decode("#1A361F"));
-            put("minecraft:deep_cold_ocean", Color.decode("#000030"));
-            put("minecraft:deep_frozen_ocean", Color.decode("#7E95B6"));
-            put("minecraft:deep_lukewarm_ocean", Color.decode("#0070FF"));
-            put("minecraft:deep_ocean", Color.decode("#000050"));
-            put("minecraft:deep_dark", Color.decode("#000000"));
-            put("minecraft:desert", Color.decode("#FAAC58"));
-            put("minecraft:dripstone_caves", Color.decode("#9C6E3E"));
-            put("minecraft:end_barrens", Color.decode("#D8D8D8"));
-            put("minecraft:end_highlands", Color.decode("#C8C8C8"));
-            put("minecraft:end_midlands", Color.decode("#A0A0A0"));
-            put("minecraft:eroded_badlands", Color.decode("#FF6D00"));
-            put("minecraft:flower_forest", Color.decode("#277C25"));
-            put("minecraft:forest", Color.decode("#056621"));
-            put("minecraft:frozen_ocean", Color.decode("#DDE8ED"));
-            put("minecraft:frozen_peaks", Color.decode("#F2F2F2"));
-            put("minecraft:frozen_river", Color.decode("#9CD6F2"));
-            put("minecraft:grove", Color.decode("#3D7E46"));
-            put("minecraft:ice_spikes", Color.decode("#FFFFFF"));
-            put("minecraft:jagged_peaks", Color.decode("#CDCDCD"));
-            put("minecraft:jungle", Color.decode("#337B00"));
-            put("minecraft:lukewarm_ocean", Color.decode("#00D5FF"));
-            put("minecraft:lush_caves", Color.decode("#5E8A59"));
-            put("minecraft:mangrove_swamp", Color.decode("#51634B"));
-            put("minecraft:meadow", Color.decode("#4DB049"));
-            put("minecraft:mushroom_fields", Color.decode("#FF00FF"));
-            put("minecraft:nether_wastes", Color.decode("#8B8B8B"));
-            put("minecraft:ocean", Color.decode("#000030"));
-            put("minecraft:old_growth_birch_forest", Color.decode("#506D3A"));
-            put("minecraft:old_growth_pine_taiga", Color.decode("#506D3A"));
-            put("minecraft:old_growth_spruce_taiga", Color.decode("#506D3A"));
-            put("minecraft:plains", Color.decode("#75A82B"));
-            put("minecraft:river", Color.decode("#37507D"));
-            put("minecraft:savanna", Color.decode("#BDB25F"));
-            put("minecraft:savanna_plateau", Color.decode("#BDB25F"));
-            put("minecraft:small_end_islands", Color.decode("#D8D8D8"));
-            put("minecraft:snowy_beach", Color.decode("#FAFAFA"));
-            put("minecraft:snowy_plains", Color.decode("#FAFAFA"));
-            put("minecraft:snowy_slopes", Color.decode("#FAFAFA"));
-            put("minecraft:snowy_taiga", Color.decode("#D8D8D8"));
-            put("minecraft:soul_sand_valley", Color.decode("#3C3C3C"));
-            put("minecraft:sparse_jungle", Color.decode("#1A7C00"));
-            put("minecraft:stony_peaks", Color.decode("#CDCDCD"));
-            put("minecraft:stony_shore", Color.decode("#8C8C8C"));
-            put("minecraft:sunflower_plains", Color.decode("#FFD801"));
-            put("minecraft:swamp", Color.decode("#2F6E49"));
-            put("minecraft:taiga", Color.decode("#05703D"));
-            put("minecraft:the_end", Color.decode("#000000"));
-            put("minecraft:the_void", Color.decode("#000000"));
-            put("minecraft:warm_ocean", Color.decode("#00A8FF"));
-            put("minecraft:warped_forest", Color.decode("#13131D"));
-            put("minecraft:windswept_forest", Color.decode("#3C643C"));
-            put("minecraft:windswept_gravelly_hills", Color.decode("#B2B2B2"));
-            put("minecraft:windswept_hills", Color.decode("#4D745A"));
-            put("minecraft:windswept_savanna", Color.decode("#BDB25F"));
-            put("minecraft:wooded_badlands", Color.decode("#FF6D00"));
+            put("minecraft:badlands", new Color(0xFF6D00));
+            put("minecraft:bamboo_jungle", new Color(0x7E9A45));
+            put("minecraft:basalt_deltas", new Color(0x2A2829));
+            put("minecraft:beach", new Color(0xFADE55));
+            put("minecraft:birch_forest", new Color(0x506D3A));
+            put("minecraft:cherry_grove", new Color(0xE965BE));
+            put("minecraft:crimson_forest", new Color(0x970000));
+            put("minecraft:dark_forest", new Color(0x1A361F));
+            put("minecraft:deep_cold_ocean", new Color(0x000030));
+            put("minecraft:deep_frozen_ocean", new Color(0x7E95B6));
+            put("minecraft:deep_lukewarm_ocean", new Color(0x0070FF));
+            put("minecraft:deep_ocean", new Color(0x000050));
+            put("minecraft:deep_dark", new Color(0x000000));
+            put("minecraft:desert", new Color(0xFAAC58));
+            put("minecraft:dripstone_caves", new Color(0x9C6E3E));
+            put("minecraft:end_barrens", new Color(0xD8D8D8));
+            put("minecraft:end_highlands", new Color(0xC8C8C8));
+            put("minecraft:end_midlands", new Color(0xA0A0A0));
+            put("minecraft:eroded_badlands", new Color(0xFF6D00));
+            put("minecraft:flower_forest", new Color(0x277C25));
+            put("minecraft:forest", new Color(0x056621));
+            put("minecraft:frozen_ocean", new Color(0xDDE8ED));
+            put("minecraft:frozen_peaks", new Color(0xF2F2F2));
+            put("minecraft:frozen_river", new Color(0x9CD6F2));
+            put("minecraft:grove", new Color(0x3D7E46));
+            put("minecraft:ice_spikes", new Color(0xFFFFFF));
+            put("minecraft:jagged_peaks", new Color(0xCDCDCD));
+            put("minecraft:jungle", new Color(0x337B00));
+            put("minecraft:lukewarm_ocean", new Color(0x00D5FF));
+            put("minecraft:lush_caves", new Color(0x5E8A59));
+            put("minecraft:mangrove_swamp", new Color(0x51634B));
+            put("minecraft:meadow", new Color(0x4DB049));
+            put("minecraft:mushroom_fields", new Color(0xFF00FF));
+            put("minecraft:nether_wastes", new Color(0x8B8B8B));
+            put("minecraft:ocean", new Color(0x000030));
+            put("minecraft:old_growth_birch_forest", new Color(0x506D3A));
+            put("minecraft:old_growth_pine_taiga", new Color(0x506D3A));
+            put("minecraft:old_growth_spruce_taiga", new Color(0x506D3A));
+            put("minecraft:plains", new Color(0x75A82B));
+            put("minecraft:river", new Color(0x37507D));
+            put("minecraft:savanna", new Color(0xBDB25F));
+            put("minecraft:savanna_plateau", new Color(0xBDB25F));
+            put("minecraft:small_end_islands", new Color(0xD8D8D8));
+            put("minecraft:snowy_beach", new Color(0xFAFAFA));
+            put("minecraft:snowy_plains", new Color(0xFAFAFA));
+            put("minecraft:snowy_slopes", new Color(0xFAFAFA));
+            put("minecraft:snowy_taiga", new Color(0xD8D8D8));
+            put("minecraft:soul_sand_valley", new Color(0x3C3C3C));
+            put("minecraft:sparse_jungle", new Color(0x1A7C00));
+            put("minecraft:stony_peaks", new Color(0xCDCDCD));
+            put("minecraft:stony_shore", new Color(0x8C8C8C));
+            put("minecraft:sunflower_plains", new Color(0xFFD801));
+            put("minecraft:swamp", new Color(0x2F6E49));
+            put("minecraft:taiga", new Color(0x05703D));
+            put("minecraft:the_end", new Color(0x000000));
+            put("minecraft:the_void", new Color(0x000000));
+            put("minecraft:warm_ocean", new Color(0x00A8FF));
+            put("minecraft:warped_forest", new Color(0x13131D));
+            put("minecraft:windswept_forest", new Color(0x3C643C));
+            put("minecraft:windswept_gravelly_hills", new Color(0xB2B2B2));
+            put("minecraft:windswept_hills", new Color(0x4D745A));
+            put("minecraft:windswept_savanna", new Color(0xBDB25F));
+            put("minecraft:wooded_badlands", new Color(0xFF6D00));
         }
     };
 
@@ -103,10 +109,12 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
     }
 
     // Variables to manage the interpolation of the tooltip
-    private int targetTooltipWidth = 0;
-    private int targetTooltipHeight = 0;
-    private int currentTooltipWidth = 0;
-    private int currentTooltipHeight = 0;
+    private double targetTooltipWidth = 0;
+    private double targetTooltipHeight = 0;
+    private double currentTooltipWidth = 0;
+    private double currentTooltipHeight = 0;
+
+    // The higher the smoothing, the faster it moves
     private final double smoothing = 0.5;
 
     // A separate timer to manage the interpolation of the tooltip
@@ -116,7 +124,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
         // If the target width and height are 0, do not interpolate
         // Or if the target width and height have been reached
         if (targetTooltipWidth == 0 && targetTooltipHeight == 0 ||
-        targetTooltipWidth == currentTooltipWidth && targetTooltipHeight == currentTooltipHeight) {
+                targetTooltipWidth == currentTooltipWidth && targetTooltipHeight == currentTooltipHeight) {
             return;
         }
 
@@ -143,6 +151,8 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
     public void setRegion(Region region) {
         this.loaded = true;
         this.region = region;
+        this.setPreferredSize(new Dimension(933, 512));
+        this.repaint();
         rendered = render();
     }
 
@@ -165,17 +175,24 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
         }
         maxWidth += 10;
         int maxHeight = (g2.getFontMetrics().getHeight() + 5) * lines.length;
+
+        // Check if the tooltip height exceeds the available space below the mouse position
+        int screenHeight = getHeight();
+        if (y + 10 + maxHeight > screenHeight) {
+            y -= maxHeight + 10; // Adjust y position to keep tooltip above the mouse
+        }
+
         targetTooltipWidth = maxWidth;
         targetTooltipHeight = maxHeight;
 
         g2.setColor(tooltipBG);
-        g2.fillRoundRect((int) mouse.getX() + 10, (int) y + 10, currentTooltipWidth, currentTooltipHeight, 10, 10);
+        g2.fillRoundRect(x + 10, y + 10, (int) currentTooltipWidth, (int) currentTooltipHeight, 10, 10);
         g2.setColor(Color.WHITE);
-        g2.drawRoundRect((int) mouse.getX() + 10, (int) y + 10, currentTooltipWidth, currentTooltipHeight, 10, 10);
+        g2.drawRoundRect(x + 10, y + 10, (int) currentTooltipWidth, (int) currentTooltipHeight, 10, 10);
 
         int yoff = 10;
         for (String line : lines) {
-            g2.drawString(line, (int) mouse.getX() + 15, (int) y + 15 + yoff);
+            g2.drawString(line, x + 15, y + 15 + yoff);
             yoff += g2.getFontMetrics().getHeight() + 5;
         }
     }
@@ -213,7 +230,6 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 }
             }
 
-            
             // draw the structure
             drawx = chunk.x * 16 - regionx * 512;
             drawz = chunk.z * 16 - regionz * 512;
@@ -230,8 +246,6 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
 
         return img;
     }
-
-    BufferedImage rendered;
 
     @Override public void paintComponent(Graphics g) {
         super.paintComponent(g);
@@ -253,10 +267,14 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             int chunkx = (int) Math.floor(mouse.getX() / 16);
             int chunkz = (int) Math.floor(mouse.getY() / 16);
             Chunk chunk = region.chunks[chunkx + chunkz * 32];
+            g2.setColor(Color.BLACK);
+            g2.drawRect(chunkx * 16, chunkz * 16, 16, 16);
 
             // If the chunk is not generated, set the tooltip to a warning
             if (chunk == null) {
-                String[] tooltip = new String[] { "Chunk not generated." };
+                String[] tooltip = new String[] {
+                        "Chunk not generated."
+                };
                 drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
             } else {
 
