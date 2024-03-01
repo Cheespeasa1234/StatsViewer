@@ -10,6 +10,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.querz.nbt.io.NBTInputStream;
+import util.AssetGlobals;
 import util.DataParsing;
 
 /**
@@ -23,7 +24,7 @@ import util.DataParsing;
 public class Chunk {
 
 	public int x, y, z;
-	public String[] biomePallete;
+	public Biome[] biomePallete;
 	public byte[][][] biomeMap;
 	public ArrayList<String> structures = new ArrayList<String>();
 	public Heightmap surfaceHeightmap;
@@ -52,9 +53,9 @@ public class Chunk {
 		JsonObject biomeData = topSection.getAsJsonObject("biomes");
 
 		JsonArray palette = biomeData.getAsJsonArray("palette");
-		biomePallete = new String[palette.size()];
+		biomePallete = new Biome[palette.size()];
 		for (int i = 0; i < palette.size(); i++) {
-			biomePallete[i] = palette.get(i).getAsString();
+			biomePallete[i] = AssetGlobals.biomes.get(palette.get(i).getAsString());
 		}
 
 		// If the pallete is one long, the whole chunk is the same biome

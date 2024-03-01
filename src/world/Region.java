@@ -90,8 +90,14 @@ public class Region {
      * @throws IOException if there is an error reading the file
      */
     public void consumeChunk() throws IOException {
-        FileInputStream fis = new FileInputStream(fileConsumed.getAbsolutePath());
-        fis.skip(locators[chunkConsumed].offsetBytes());
+        // FileInputStream fis = new FileInputStream(fileConsumed.getAbsolutePath());
+        // fis.skip(locators[chunkConsumed].offsetBytes());
+        long fisLoc = fis.getChannel().position();
+        long loc = locators[chunkConsumed].offsetBytes();
+        if (fisLoc != loc) {
+            int dif = (int) (loc - fisLoc);
+            fis.skip(dif);
+        }
 
         byte[] metadata = new byte[5];
         fis.read(metadata);
@@ -113,10 +119,10 @@ public class Region {
             }
         }
 
-        fis.close();
         chunkConsumed++;
     }
 
+    FileInputStream fis;
     /**
      * Start parsing the region file, and show the progress bar
      * 
@@ -126,8 +132,8 @@ public class Region {
      */
     public Region(File file) throws IOException, Exception {
         // Open the file
+        fis = new FileInputStream(file.getAbsolutePath());
         fileConsumed = file;
-        FileInputStream fis = new FileInputStream(file.getAbsolutePath());
         String[] split = file.getName().split("\\.");
         int regionx = Integer.parseInt(split[1]);
         int regionz = Integer.parseInt(split[2]);
@@ -144,6 +150,8 @@ public class Region {
             locators[locatorIdx] = new Locator(header[byteIdx], header[byteIdx + 1], header[byteIdx + 2],
                     header[byteIdx + 3]);
         }
+
+        fis = new FileInputStream(file.getAbsolutePath());
     }
 
 }

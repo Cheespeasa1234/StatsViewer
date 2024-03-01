@@ -11,12 +11,14 @@ import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
 
+import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.SwingUtilities;
 import javax.swing.UIManager;
 import javax.swing.UnsupportedLookAndFeelException;
 
+import util.AssetGlobals;
 import util.DataParsing;
 import util.Globals;
 import util.Utility;
@@ -197,6 +199,13 @@ public class StatsViewer extends JPanel implements KeyListener {
                 System.out.println("Failed to open recents file.");
                 e.printStackTrace();
             }
+        }
+
+        // set the icon assets
+        File structureIcons = new File("src/assets/icons/struct/minecraft");
+        for (File icon : structureIcons.listFiles()) {
+            AssetGlobals.structureIcons.put("minecraft:" + icon.getName().replace(".png", ""),
+                    new ImageIcon(icon.getAbsolutePath()));
         }
 
         createPages();

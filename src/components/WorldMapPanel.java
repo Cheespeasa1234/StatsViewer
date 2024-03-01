@@ -16,6 +16,7 @@ import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
+import util.AssetGlobals;
 import world.Chunk;
 import world.Region;
 
@@ -30,80 +31,12 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
     public BufferedImage rendered;
     public boolean loaded = false;
 
+    
     public boolean mapRendered() {
         return rendered != null;
     }
 
-    private static HashMap<String, ImageIcon> structureIconCache = new HashMap<>();
-
-    // Map of biomes to colors
-    private static HashMap<String, Color> coloredBiomes = new HashMap<>() {
-        {
-            put("minecraft:badlands", new Color(0xFF6D00));
-            put("minecraft:bamboo_jungle", new Color(0x7E9A45));
-            put("minecraft:basalt_deltas", new Color(0x2A2829));
-            put("minecraft:beach", new Color(0xFADE55));
-            put("minecraft:birch_forest", new Color(0x506D3A));
-            put("minecraft:cherry_grove", new Color(0xE965BE));
-            put("minecraft:crimson_forest", new Color(0x970000));
-            put("minecraft:dark_forest", new Color(0x1A361F));
-            put("minecraft:deep_cold_ocean", new Color(0x000030));
-            put("minecraft:deep_frozen_ocean", new Color(0x7E95B6));
-            put("minecraft:deep_lukewarm_ocean", new Color(0x0070FF));
-            put("minecraft:deep_ocean", new Color(0x000050));
-            put("minecraft:deep_dark", new Color(0x000000));
-            put("minecraft:desert", new Color(0xFAAC58));
-            put("minecraft:dripstone_caves", new Color(0x9C6E3E));
-            put("minecraft:end_barrens", new Color(0xD8D8D8));
-            put("minecraft:end_highlands", new Color(0xC8C8C8));
-            put("minecraft:end_midlands", new Color(0xA0A0A0));
-            put("minecraft:eroded_badlands", new Color(0xFF6D00));
-            put("minecraft:flower_forest", new Color(0x277C25));
-            put("minecraft:forest", new Color(0x056621));
-            put("minecraft:frozen_ocean", new Color(0xDDE8ED));
-            put("minecraft:frozen_peaks", new Color(0xF2F2F2));
-            put("minecraft:frozen_river", new Color(0x9CD6F2));
-            put("minecraft:grove", new Color(0x3D7E46));
-            put("minecraft:ice_spikes", new Color(0xFFFFFF));
-            put("minecraft:jagged_peaks", new Color(0xCDCDCD));
-            put("minecraft:jungle", new Color(0x337B00));
-            put("minecraft:lukewarm_ocean", new Color(0x00D5FF));
-            put("minecraft:lush_caves", new Color(0x5E8A59));
-            put("minecraft:mangrove_swamp", new Color(0x51634B));
-            put("minecraft:meadow", new Color(0x4DB049));
-            put("minecraft:mushroom_fields", new Color(0xFF00FF));
-            put("minecraft:nether_wastes", new Color(0x8B8B8B));
-            put("minecraft:ocean", new Color(0x000030));
-            put("minecraft:old_growth_birch_forest", new Color(0x506D3A));
-            put("minecraft:old_growth_pine_taiga", new Color(0x506D3A));
-            put("minecraft:old_growth_spruce_taiga", new Color(0x506D3A));
-            put("minecraft:plains", new Color(0x75A82B));
-            put("minecraft:river", new Color(0x37507D));
-            put("minecraft:savanna", new Color(0xBDB25F));
-            put("minecraft:savanna_plateau", new Color(0xBDB25F));
-            put("minecraft:small_end_islands", new Color(0xD8D8D8));
-            put("minecraft:snowy_beach", new Color(0xFAFAFA));
-            put("minecraft:snowy_plains", new Color(0xFAFAFA));
-            put("minecraft:snowy_slopes", new Color(0xFAFAFA));
-            put("minecraft:snowy_taiga", new Color(0xD8D8D8));
-            put("minecraft:soul_sand_valley", new Color(0x3C3C3C));
-            put("minecraft:sparse_jungle", new Color(0x1A7C00));
-            put("minecraft:stony_peaks", new Color(0xCDCDCD));
-            put("minecraft:stony_shore", new Color(0x8C8C8C));
-            put("minecraft:sunflower_plains", new Color(0xFFD801));
-            put("minecraft:swamp", new Color(0x2F6E49));
-            put("minecraft:taiga", new Color(0x05703D));
-            put("minecraft:the_end", new Color(0x000000));
-            put("minecraft:the_void", new Color(0x000000));
-            put("minecraft:warm_ocean", new Color(0x00A8FF));
-            put("minecraft:warped_forest", new Color(0x13131D));
-            put("minecraft:windswept_forest", new Color(0x3C643C));
-            put("minecraft:windswept_gravelly_hills", new Color(0xB2B2B2));
-            put("minecraft:windswept_hills", new Color(0x4D745A));
-            put("minecraft:windswept_savanna", new Color(0xBDB25F));
-            put("minecraft:wooded_badlands", new Color(0xFF6D00));
-        }
-    };
+    
 
     public WorldMapPanel() {
         this.addMouseListener(this);
@@ -229,7 +162,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             int drawz = chunk.z * 16 - regionz * 512;
             for (int z = 0; z < 16; z++) { // Swap x and z in the loop
                 for (int x = 0; x < 16; x++) { // Swap x and z in the loop
-                    g2.setColor(coloredBiomes.get(chunk.biomePallete[chunk.biomeMap[x / 4][z][0]]));
+                    g2.setColor(chunk.biomePallete[chunk.biomeMap[x / 4][z][0]].color);
                     g2.fillRect(drawx + (15 - z), drawz + (15 - x), 2, 2); // Adjust coordinates for rotation
                 }
             }
@@ -237,6 +170,9 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
 
         for (int i = 0; i < region.chunks.length; i++) {
             Chunk chunk = region.chunks[i];
+            if (chunk == null) {
+                continue;
+            }
             // draw the structure
             int drawx = chunk.x * 16 - regionx * 512;
             int drawz = chunk.z * 16 - regionz * 512;
@@ -245,14 +181,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 int reservedSpace = 16 / count;
                 for (int j = 0; j < count; j++) {
                     String id = chunk.structures.get(j);
-                    ImageIcon icon;
-                    if (!structureIconCache.containsKey(id)) {
-                        File file = new File("src/icons/struct/" + id.replace(":", "_") + ".png");
-                        icon = new ImageIcon(file.getAbsolutePath());
-                        structureIconCache.put(id, icon);
-                    } else {
-                        icon = structureIconCache.get(id);
-                    }
+                    ImageIcon icon = AssetGlobals.structureIcons.get(id);
 
                     int x = drawx + (j * reservedSpace);
                     int z = drawz + (j * reservedSpace);
@@ -292,8 +221,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             int chunkx = (int) Math.floor(mouse.getX() / 16);
             int chunkz = (int) Math.floor(mouse.getY() / 16);
             Chunk chunk = region.chunks[chunkx + chunkz * 32];
-            g2.setColor(Color.BLACK);
-            g2.drawRect(chunkx * 16, chunkz * 16, 16, 16);
+            g2.drawImage(AssetGlobals.hoverIcon1.getImage(), chunkx * 16, chunkz * 16, 16, 16, null);
 
             // If the chunk is not generated, set the tooltip to a warning
             if (chunk == null) {
@@ -311,7 +239,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 int y = chunk.surfaceHeightmap.getHeight(blockx, blockz);
 
                 // Build and display a tooltip
-                String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]];
+                String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]].formalizedName;
                 String[] tooltip = new String[3 + chunk.structures.size()];
                 tooltip[0] = "Biome: " + biome;
                 tooltip[1] = "Block: x=" + blockx + " y=" + y + " z=" + blockz;

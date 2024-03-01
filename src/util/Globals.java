@@ -61,7 +61,7 @@ public class Globals {
     public static String OPEN_WORLD_NAME = "";
 
     /**
-     * 
+     * The root directory of the minecraft server open.
      */
     public static File SERVER_DIRECTORY;
 }
