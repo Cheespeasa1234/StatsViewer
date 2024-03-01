@@ -10,7 +10,6 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 
 import net.querz.nbt.io.NBTInputStream;
-import net.querz.nbt.io.NamedTag;
 import util.DataParsing;
 
 /**
@@ -27,6 +26,7 @@ public class Chunk {
 	public String[] biomePallete;
 	public byte[][][] biomeMap;
 	public ArrayList<String> structures = new ArrayList<String>();
+	public Heightmap surfaceHeightmap;
 
 	/**
 	 * Sets the biomePallete and biomeMap during loading.
@@ -132,10 +132,11 @@ public class Chunk {
 		this.x = json.get("xPos").getAsInt();
 		this.y = json.get("yPos").getAsInt();
 		this.z = json.get("zPos").getAsInt();
-
+		
 		this.setBiome(json);
+		
+		// Load in the structures
 		JsonObject structures = json.getAsJsonObject("structures");
-
 		if (structures.has("References")) {
 			JsonObject references = structures.getAsJsonObject("References");
 			// get every key
@@ -158,5 +159,14 @@ public class Chunk {
 			}
 
 		}
+	
+		// Load the heightmap
+		JsonObject heightmaps = json.getAsJsonObject("Heightmaps");
+		JsonArray surface = heightmaps.getAsJsonArray("WORLD_SURFACE");
+		long[] surfaceData = new long[surface.size()];
+		for (int i = 0; i < surface.size(); i++) {
+			surfaceData[i] = surface.get(i).getAsLong();
+		}
+		this.surfaceHeightmap = new Heightmap(surfaceData);
 	}
 }

@@ -10,7 +10,9 @@ import java.awt.event.MouseMotionListener;
 import java.util.HashMap;
 import java.awt.geom.Point2D;
 import java.awt.image.BufferedImage;
+import java.io.File;
 
+import javax.swing.ImageIcon;
 import javax.swing.JPanel;
 import javax.swing.Timer;
 
@@ -226,7 +228,7 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             for (int z = 0; z < 16; z++) { // Swap x and z in the loop
                 for (int x = 0; x < 16; x++) { // Swap x and z in the loop
                     g2.setColor(coloredBiomes.get(chunk.biomePallete[chunk.biomeMap[x / 4][z][0]]));
-                    g2.fillRect(drawx + (15 - z), drawz + (15 - x), 1, 1); // Adjust coordinates for rotation
+                    g2.fillRect(drawx + (15 - z), drawz + (15 - x), 2, 2); // Adjust coordinates for rotation
                 }
             }
 
@@ -237,9 +239,18 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 int count = chunk.structures.size();
                 int reservedSpace = 16 / count;
                 for (int j = 0; j < count; j++) {
-                    g2.setColor(Color.BLACK);
-                    g2.fillOval(drawx + (j * reservedSpace), drawz + (j * reservedSpace), reservedSpace,
-                            reservedSpace);
+                    File file = new File("src/icons/struct/" + chunk.structures.get(j).replace(":", "_") + ".png");
+                    ImageIcon icon = new ImageIcon(file.getAbsolutePath());
+                    System.out.println(file.getAbsolutePath());
+                    if (icon.getImage() == null) {
+                        g2.setColor(Color.BLACK);
+                        g2.fillOval(drawx + (j * reservedSpace), drawz + (j * reservedSpace), reservedSpace,
+                                reservedSpace);
+                    } else {
+                        g2.drawImage(icon.getImage(), drawx + (j * reservedSpace), drawz + (j * reservedSpace),
+                                reservedSpace,
+                                reservedSpace, null);
+                    }
                 }
             }
         }
@@ -273,7 +284,8 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
             // If the chunk is not generated, set the tooltip to a warning
             if (chunk == null) {
                 String[] tooltip = new String[] {
-                        "Chunk not generated."
+                        "Not generated.",
+                        "Chunk " + (chunkx + region.x * 32) + ", " + (chunkz + region.z * 32)
                 };
                 drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
             } else {
@@ -282,13 +294,16 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                 int blockx = (int) Math.floor((mouse.getX() - chunkx * 16) / 16 * 16);
                 int blockz = (int) Math.floor((mouse.getY() - chunkz * 16) / 16 * 16);
 
+                int y = chunk.surfaceHeightmap.getHeight(blockx, blockz);
+
                 // Build and display a tooltip
                 String biome = chunk.biomePallete[chunk.biomeMap[blockx / 4][blockz][0]];
-                String[] tooltip = new String[2 + chunk.structures.size()];
+                String[] tooltip = new String[3 + chunk.structures.size()];
                 tooltip[0] = "Biome: " + biome;
-                tooltip[1] = "Chunk: " + chunk.x + ", " + chunk.z;
+                tooltip[1] = "Block: x=" + blockx + " y=" + y + " z=" + blockz;
+                tooltip[2] = "Chunk: x=" + chunkx + " z=" + chunkz;
                 for (int i = 0; i < chunk.structures.size(); i++) {
-                    tooltip[i + 2] = chunk.structures.get(i);
+                    tooltip[i + 3] = chunk.structures.get(i);
                 }
                 drawTooltip(g2, (int) mouse.getX(), (int) mouse.getY(), tooltip);
             }
