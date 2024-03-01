@@ -7,3 +7,4 @@
 /out/*
 *.code-workspace
 recent_directories.txt
+src/.DS_Store

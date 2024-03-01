@@ -104,11 +104,9 @@ public class Region {
             chunks[chunkConsumed] = null;
         } else {
             byte compression = metadata[4];
-            if (compression == 0x00) {
+            if (compression != 0x02) {
                 System.err.println("Invalid compression type: " + String.format("0x%02X 0x%02X 0x%02X 0x%02X 0x%02X",
                         metadata[0], metadata[1], metadata[2], metadata[3], metadata[4], compression));
-            } else if (compression != 0x02) {
-                System.err.println("Invalid compression type: " + String.format("0x%02X", compression));
             } else {
                 byte[] decompressed = DataParsing.decompressZlib(data);
                 chunks[chunkConsumed] = new Chunk(decompressed);

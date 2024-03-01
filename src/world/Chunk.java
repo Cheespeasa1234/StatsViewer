@@ -162,11 +162,15 @@ public class Chunk {
 	
 		// Load the heightmap
 		JsonObject heightmaps = json.getAsJsonObject("Heightmaps");
-		JsonArray surface = heightmaps.getAsJsonArray("WORLD_SURFACE");
-		long[] surfaceData = new long[surface.size()];
-		for (int i = 0; i < surface.size(); i++) {
-			surfaceData[i] = surface.get(i).getAsLong();
+		if (!heightmaps.has("WORLD_SURFACE")) {
+			surfaceHeightmap = new Heightmap(new long[37]);
+		} else {
+			JsonArray surface = heightmaps.getAsJsonArray("WORLD_SURFACE");
+			long[] surfaceData = new long[surface.size()];
+			for (int i = 0; i < surface.size(); i++) {
+				surfaceData[i] = surface.get(i).getAsLong();
+			}
+			this.surfaceHeightmap = new Heightmap(surfaceData);
 		}
-		this.surfaceHeightmap = new Heightmap(surfaceData);
 	}
 }

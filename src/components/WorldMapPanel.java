@@ -34,6 +34,8 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
         return rendered != null;
     }
 
+    private static HashMap<String, ImageIcon> structureIconCache = new HashMap<>();
+
     // Map of biomes to colors
     private static HashMap<String, Color> coloredBiomes = new HashMap<>() {
         {
@@ -231,25 +233,37 @@ public class WorldMapPanel extends JPanel implements MouseListener, MouseMotionL
                     g2.fillRect(drawx + (15 - z), drawz + (15 - x), 2, 2); // Adjust coordinates for rotation
                 }
             }
+        }
 
+        for (int i = 0; i < region.chunks.length; i++) {
+            Chunk chunk = region.chunks[i];
             // draw the structure
-            drawx = chunk.x * 16 - regionx * 512;
-            drawz = chunk.z * 16 - regionz * 512;
+            int drawx = chunk.x * 16 - regionx * 512;
+            int drawz = chunk.z * 16 - regionz * 512;
             if (chunk.structures != null && chunk.structures.size() > 0) {
                 int count = chunk.structures.size();
                 int reservedSpace = 16 / count;
                 for (int j = 0; j < count; j++) {
-                    File file = new File("src/icons/struct/" + chunk.structures.get(j).replace(":", "_") + ".png");
-                    ImageIcon icon = new ImageIcon(file.getAbsolutePath());
-                    System.out.println(file.getAbsolutePath());
+                    String id = chunk.structures.get(j);
+                    ImageIcon icon;
+                    if (!structureIconCache.containsKey(id)) {
+                        File file = new File("src/icons/struct/" + id.replace(":", "_") + ".png");
+                        icon = new ImageIcon(file.getAbsolutePath());
+                        structureIconCache.put(id, icon);
+                    } else {
+                        icon = structureIconCache.get(id);
+                    }
+
+                    int x = drawx + (j * reservedSpace);
+                    int z = drawz + (j * reservedSpace);
+                    int w = reservedSpace, h = reservedSpace;
                     if (icon.getImage() == null) {
                         g2.setColor(Color.BLACK);
-                        g2.fillOval(drawx + (j * reservedSpace), drawz + (j * reservedSpace), reservedSpace,
-                                reservedSpace);
+                        g2.fillOval(x, z, w, h);
+                    } else if (id.equals("minecraft:mineshaft") || id.equals("minecraft:buried_treasure")) {
+                        g2.drawImage(icon.getImage(), x, z, w, h, null);
                     } else {
-                        g2.drawImage(icon.getImage(), drawx + (j * reservedSpace), drawz + (j * reservedSpace),
-                                reservedSpace,
-                                reservedSpace, null);
+                        g2.drawImage(icon.getImage(), x - w / 2, z - h / 2, w * 2, h * 2, null);
                     }
                 }
             }
