@@ -76,7 +76,7 @@ Here is a brief overview of the packages and their contents:
     * `BlankPanel.java` - The first page of the program. It handles server selection and tracking.
     * `DialogManager.java` - The static class that manages the progress bar popups.
     * `MainPanel.java` - The second page of the program. It displays player info, world info, and handles most interactions.
-    * `StatsViewer.javav` - The main class. It starts the program and handles the main GUI.
+    * `StatsViewer.java` - The main class. It starts the program and handles the main GUI.
 
 * `util` - The utility package. Contains libraries, utilities, and global state management.
     * `DataParsing.java` - Contains utility functions for files, JSON parsing, and NBT parsing.
